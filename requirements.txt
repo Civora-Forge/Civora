@@ -1,0 +1,19 @@
+# Civora project requirements (developer quick-start)
+#
+# System requirements:
+# - Node.js >= 18 (https://nodejs.org/)
+# - npm >= 9 (bundled with Node)
+# - Git
+# - (Optional for deployment) Firebase CLI: `npm install -g firebase-tools`
+# - (Optional for deployment) Google Cloud SDK (gcloud)
+#
+# Per-package Node dependencies (installed by running `npm install` in each folder):
+# - frontend-pwa: install via `cd frontend-pwa && npm install`
+# - backend-api: install via `cd backend-api && npm install`
+# - ai-services: install via `cd ai-services && npm install` then install runtime libs below
+#
+# Additional runtime libraries required for AI features (ai-services):
+# - node-fetch@2
+# - @google-cloud/speech
+#
+# Quick install (PowerShell) — recommended: use `scripts/install-all.ps1` to automate.
