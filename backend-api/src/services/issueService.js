@@ -1,5 +1,5 @@
 const { getRepository } = require("../repositories/issueRepository");
-const { enrichIssue } = require("../../../ai-services/src/enrichIssue");
+const { enrichIssue } = require("./aiClient");
 const { calculatePriorityScore } = require("./priorityScoring");
 const { assignClusterIds } = require("./issueClustering");
 const { buildPriorityExplanation } = require("./priorityExplanation");
