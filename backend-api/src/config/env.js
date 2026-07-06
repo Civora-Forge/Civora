@@ -7,6 +7,9 @@ const env = {
   ENABLE_AI_ENRICHMENT: process.env.ENABLE_AI_ENRICHMENT === "true",
   ENABLE_BIGQUERY_EXPORT: process.env.ENABLE_BIGQUERY_EXPORT === "true",
   GEMINI_API_KEY: process.env.GEMINI_API_KEY || "",
+  AI_ENRICHMENT_TIMEOUT_MS: process.env.AI_ENRICHMENT_TIMEOUT_MS
+    ? parseInt(process.env.AI_ENRICHMENT_TIMEOUT_MS, 10)
+    : 3000,
 };
 
 module.exports = { env };
