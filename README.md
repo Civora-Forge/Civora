@@ -165,6 +165,9 @@ git clone <repository-url>
 cd civora
 ```
 
+Install all dependencies by running ".\scripts\install-all.ps1"
+
+
 ### Frontend Setup
 
 ```bash
@@ -622,3 +625,4 @@ Civora is designed to integrate with Google Cloud services:
 | Google Maps | Hotspot map display | Backend payload ready |
 
 All adapters run in stub mode by default. No Google Cloud credentials are required for local development.
+
