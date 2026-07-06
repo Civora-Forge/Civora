@@ -1,0 +1,1 @@
+This folder contains the Civora PWA frontend. It owns citizen reporting screens and MP dashboard UI. It must only communicate with backend-api through HTTP and must not directly access Firestore, BigQuery, or AI services.
