@@ -4,6 +4,10 @@
   "version": "0.1.0",
   "main": "src/enrichIssue.js",
   "scripts": {
-    "test": "node src/enrichIssue.js"
+    "test": "node test/run_tests.js"
+  },
+  "dependencies": {
+    "@google-cloud/speech": "^7.5.0",
+    "node-fetch": "^2.7.0"
   }
 }
