@@ -1,0 +1,9 @@
+{
+  "name": "civora-ai-services",
+  "private": true,
+  "version": "0.1.0",
+  "main": "src/enrichIssue.js",
+  "scripts": {
+    "test": "node src/enrichIssue.js"
+  }
+}
