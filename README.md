@@ -456,25 +456,6 @@ severity = low | medium | high
 ```
 
 ---
-
-## Team Assignment Guide
-
-| Team Member | Work In | Never Touch |
-|-------------|---------|-------------|
-| Frontend dev | `frontend-pwa/` only | `backend-api/`, `ai-services/`, `data-infra/` |
-| Backend dev | `backend-api/` only | `frontend-pwa/`, `ai-services/`, `data-infra/` |
-| AI/ML dev | `ai-services/` only | `frontend-pwa/`, `backend-api/`, `data-infra/` |
-| Data/DevOps | `data-infra/` only | `frontend-pwa/`, `backend-api/`, `ai-services/` |
-| Shared contracts | `shared/contracts.md` only | All other files |
-
-**Rules:**
-
-- Stay inside your folder.
-- If you need a change in another folder, open a GitHub issue or discuss with the team.
-- Never edit `shared/contracts.md` without team sync.
-
----
-
 ## Environment Variables
 
 Create `.env` files in each folder as needed. These are gitignored.

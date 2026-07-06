@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { enrichIssue } = require("./enrichIssue");
+const { enrichIssue } = require("../../ai-services/src/enrichIssue");
 
 const app = express();
 app.use(cors());
