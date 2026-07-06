@@ -604,3 +604,21 @@ Civora is built for inclusive civic participation across diverse connectivity co
 - **Lightweight API payloads** — optimized JSON responses for slow 2G/3G mobile networks
 - **Maps-ready hotspot data** — clean geospatial payloads for the MP dashboard map view
 - **Future SMS/WhatsApp/Dialogflow integration** — reach citizens without smartphones or internet access
+
+---
+
+## Google Cloud Alignment
+
+Civora is designed to integrate with Google Cloud services:
+
+| Service | Purpose | Status |
+|---------|---------|--------|
+| Firebase/Firestore | Persistent issue storage | Adapter ready |
+| Gemini/Vertex AI | Issue classification and severity | Adapter ready |
+| Cloud Translation | Multilingual text normalization | Adapter ready |
+| Cloud Speech-to-Text | Voice-based issue intake | Adapter ready |
+| Gemini Multimodal / Vision | Photo analysis | Adapter ready |
+| BigQuery | Analytics and reporting | Export helper ready |
+| Google Maps | Hotspot map display | Backend payload ready |
+
+All adapters run in stub mode by default. No Google Cloud credentials are required for local development.
