@@ -1,21 +1,21 @@
 const issues = [];
 let nextId = 1;
 
-function addIssue(issue) {
+async function addIssue(issue) {
   const stored = { id: `issue_${nextId++}`, ...issue };
   issues.push(stored);
   return stored;
 }
 
-function getAllIssues() {
+async function getAllIssues() {
   return issues;
 }
 
-function getIssueById(id) {
+async function getIssueById(id) {
   return issues.find((i) => i.id === id);
 }
 
-function clearIssues() {
+async function clearIssues() {
   issues.length = 0;
   nextId = 1;
 }

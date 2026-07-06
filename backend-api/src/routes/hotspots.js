@@ -2,8 +2,8 @@ const express = require("express");
 const router = express.Router();
 const { buildHotspots } = require("../services/hotspotService");
 
-router.get("/", (req, res) => {
-  const hotspots = buildHotspots();
+router.get("/", async (req, res) => {
+  const hotspots = await buildHotspots();
   return res.json(hotspots);
 });
 

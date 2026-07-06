@@ -1,4 +1,4 @@
-const { addIssue, getAllIssues } = require("../repositories/inMemoryIssueRepository");
+const { getRepository } = require("../repositories/issueRepository");
 const { enrichIssue } = require("../../../ai-services/src/enrichIssue");
 const { calculatePriorityScore } = require("./priorityScoring");
 const { assignClusterIds } = require("./issueClustering");
@@ -16,16 +16,31 @@ function getWardContext(wardId) {
 }
 
 async function submitIssue(rawIssue) {
+  const repo = getRepository();
+
   const enrichedFields = await enrichIssue(rawIssue);
 
   const issue = {
     ...rawIssue,
     ...enrichedFields,
+    aiPriorityScore: enrichedFields.priorityScore || 0.5,
+    backendPriorityScore: 0,
+    priorityScore: 0,
+    clusterId: "",
+    duplicateCount: 1,
+    priorityExplanation: [],
+    aiSignals: enrichedFields.aiSignals || {
+      translatedText: "",
+      detectedLanguage: rawIssue.language || "unknown",
+      photoFindings: [],
+      classificationConfidence: 0,
+      modelProvider: "stub",
+    },
   };
 
-  const stored = addIssue(issue);
+  const stored = await repo.addIssue(issue);
 
-  const allIssues = getAllIssues();
+  const allIssues = await repo.getAllIssues();
   const { clusters, issueClusterMap } = assignClusterIds(allIssues);
   const clusterInfo = issueClusterMap[stored.id] || { clusterId: "cluster_0", duplicateCount: 1 };
 
@@ -38,16 +53,20 @@ async function submitIssue(rawIssue) {
     daysSinceCreation: daysSince(stored.createdAt),
   };
 
-  const priorityScore = calculatePriorityScore(stored, context);
+  const backendPriorityScore = calculatePriorityScore(stored, context);
   const explanation = buildPriorityExplanation(stored, context);
 
-  stored.priorityScore = priorityScore;
+  stored.backendPriorityScore = backendPriorityScore;
+  stored.priorityScore = backendPriorityScore;
   stored.clusterId = clusterInfo.clusterId;
-  stored.explanation = explanation;
+  stored.duplicateCount = clusterInfo.duplicateCount;
+  stored.priorityExplanation = explanation;
+
+  await repo.addIssue(stored);
 
   return {
     issueId: stored.id,
-    priorityScore,
+    priorityScore: stored.priorityScore,
     clusterId: clusterInfo.clusterId,
     explanation,
   };

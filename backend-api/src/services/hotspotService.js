@@ -1,8 +1,8 @@
 const { getAllIssues } = require("../repositories/inMemoryIssueRepository");
 const { buildClusters } = require("./issueClustering");
 
-function buildHotspots() {
-  const issues = getAllIssues();
+async function buildHotspots() {
+  const issues = await getAllIssues();
   const clusters = buildClusters(issues);
 
   const hotspots = clusters.map((cluster) => {
@@ -12,7 +12,7 @@ function buildHotspots() {
       cluster.issues.length;
 
     const allExplanations = cluster.issues
-      .flatMap((i) => i.explanation || [])
+      .flatMap((i) => i.priorityExplanation || i.explanation || [])
       .filter((v, idx, arr) => arr.indexOf(v) === idx);
 
     return {

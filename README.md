@@ -591,3 +591,16 @@ gcloud run deploy civora-api --source .
 - [ ] Authentication for citizens and admins
 - [ ] Security rules for Firestore
 - [ ] Monitoring and error tracking
+
+---
+
+## Accessibility and Low-Connectivity Design
+
+Civora is built for inclusive civic participation across diverse connectivity conditions:
+
+- **Multilingual text intake** — citizens submit issues in their local language (Malayalam, Hindi, Tamil, etc.)
+- **Voice intake** — future Google Speech-to-Text integration enables audio reports for illiterate users
+- **Photo-based reporting** — Gemini multimodal vision analyzes civic issue photos automatically
+- **Lightweight API payloads** — optimized JSON responses for slow 2G/3G mobile networks
+- **Maps-ready hotspot data** — clean geospatial payloads for the MP dashboard map view
+- **Future SMS/WhatsApp/Dialogflow integration** — reach citizens without smartphones or internet access

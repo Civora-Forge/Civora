@@ -18,14 +18,21 @@
 | `finalCategory` | string | AI-determined category |
 | `severity` | string | `low` / `medium` / `high` |
 | `projectTitle` | string | Auto-generated title |
-| `priorityScore` | number | 0.0–1.0 score |
+| `aiPriorityScore` | number | AI-assigned priority (0.0–1.0) |
+| `backendPriorityScore` | number | Backend-calculated priority (0.0–1.0) |
+| `priorityScore` | number | Final priority score (0.0–1.0) |
 | `wardId` | string | Mapped ward ID |
+| `clusterId` | string | Geo-cluster identifier |
+| `duplicateCount` | number | Number of similar issues in cluster |
+| `priorityExplanation` | array | Human-readable priority reasons |
+| `aiSignals` | object | AI enrichment metadata |
 | `status` | string | `pending` / `reviewed` / `resolved` |
 
 **Indexes:**
 - Composite index on `wardId` + `finalCategory`
 - Composite index on `severity` + `priorityScore`
 - Single index on `createdAt`
+- Single index on `clusterId`
 
 ### `wards`
 

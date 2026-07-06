@@ -1,8 +1,8 @@
 const { getAllIssues } = require("../repositories/inMemoryIssueRepository");
 const { buildClusters } = require("./issueClustering");
 
-function buildSummary() {
-  const issues = getAllIssues();
+async function buildSummary() {
+  const issues = await getAllIssues();
   const totalIssues = issues.length;
   const highPriorityIssues = issues.filter((i) => i.severity === "high").length;
 

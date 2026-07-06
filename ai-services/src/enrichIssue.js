@@ -1,47 +1,56 @@
 /**
  * Civora AI Enrichment Service
  *
- * Pure functions for issue enrichment.
- * No API routes, no database access, no frontend logic.
+ * Orchestrates issue enrichment through adapter layers.
+ * Supports stub mode (default) and real Google AI when configured.
  */
 
-/**
- * Enriches a raw issue with AI-derived fields.
- * @param {object} rawIssue - The raw issue from the citizen
- * @returns {object} Enriched fields: finalCategory, severity, projectTitle, priorityScore, wardId
- */
+const { classifyIssueWithGemini } = require("./adapters/geminiAdapter");
+const { translateToEnglish } = require("./adapters/translationAdapter");
+const { transcribeAudio } = require("./adapters/speechToTextAdapter");
+const { analyzeIssuePhoto } = require("./adapters/visionAdapter");
+
 async function enrichIssue(rawIssue) {
-  // TODO: Implement Google Speech-to-Text
-  //   - If rawIssue.audioUrl is provided, transcribe audio to text
-  //   - Append transcribed text to rawIssue.text
+  const text = rawIssue.text || "";
+  const language = rawIssue.language || "en";
+  const photoUrl = rawIssue.photoUrl || "";
+  const audioUrl = rawIssue.audioUrl || "";
+  const categoryHint = rawIssue.categoryHint || "";
 
-  // TODO: Implement Google Translation API
-  //   - If rawIssue.language is not "en", translate text to English
-  //   - Store original language text separately
+  // Step 1: Transcribe audio if provided
+  const audioResult = await transcribeAudio(audioUrl, language);
+  let enrichedText = text;
+  if (audioResult.transcript) {
+    enrichedText = `${text} ${audioResult.transcript}`.trim();
+  }
 
-  // TODO: Implement Gemini/Vertex AI classification
-  //   - Use rawIssue.text to determine finalCategory
-  //   - Generate projectTitle from classification
+  // Step 2: Translate to English if needed
+  const translationResult = await translateToEnglish(enrichedText, language);
+  const textForClassification = translationResult.translatedText || enrichedText;
 
-  // TODO: Implement severity estimation
-  //   - Use text analysis, category, and location data
-  //   - Return "low", "medium", or "high"
+  // Step 3: Analyze photo if provided
+  const visionResult = await analyzeIssuePhoto(photoUrl);
 
-  // TODO: Implement priority scoring model
-  //   - Score based on severity, frequency in area, infrastructure needs
-  //   - Return float between 0.0 and 1.0
+  // Step 4: Classify using Gemini
+  const classificationInput = {
+    text: textForClassification,
+    categoryHint,
+  };
+  const classificationResult = await classifyIssueWithGemini(classificationInput);
 
-  // TODO: Implement ward mapping
-  //   - Use latitude/longitude to map to wardId
-  //   - Reference data-infra/firestore/schema.md for ward data
-
-  // Stub: Return hardcoded enriched fields
   return {
-    finalCategory: rawIssue.categoryHint || "roads",
-    severity: "medium",
-    projectTitle: "Road repair request near reported location",
-    priorityScore: 0.72,
-    wardId: "15",
+    finalCategory: classificationResult.finalCategory || categoryHint || "roads",
+    severity: classificationResult.severity || "medium",
+    projectTitle: classificationResult.projectTitle || "Civic improvement project",
+    priorityScore: 0.5,
+    wardId: rawIssue.wardId || "15",
+    aiSignals: {
+      translatedText: translationResult.translatedText !== enrichedText ? translationResult.translatedText : "",
+      detectedLanguage: translationResult.detectedLanguage || language,
+      photoFindings: visionResult.findings || [],
+      classificationConfidence: classificationResult.confidence || 0,
+      modelProvider: classificationResult.provider || "stub",
+    },
   };
 }
 

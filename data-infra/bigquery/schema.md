@@ -8,21 +8,20 @@
 
 | Column | Type | Description |
 |--------|------|-------------|
-| `id` | STRING | Unique issue ID |
+| `issue_id` | STRING | Unique issue ID |
 | `text` | STRING | Citizen description |
 | `language` | STRING | ISO language code |
-| `photo_url` | STRING | Photo URL |
-| `audio_url` | STRING | Audio URL |
+| `final_category` | STRING | AI-determined category |
+| `severity` | STRING | `low` / `medium` / `high` |
+| `ward_id` | STRING | Mapped ward ID |
 | `latitude` | FLOAT64 | GPS latitude |
 | `longitude` | FLOAT64 | GPS longitude |
 | `created_at` | TIMESTAMP | Submission time |
-| `category_hint` | STRING | Citizen-suggested category |
-| `final_category` | STRING | AI-determined category |
-| `severity` | STRING | `low` / `medium` / `high` |
-| `project_title` | STRING | Auto-generated title |
-| `priority_score` | FLOAT64 | 0.0–1.0 score |
-| `ward_id` | STRING | Mapped ward ID |
-| `status` | STRING | `pending` / `reviewed` / `resolved` |
+| `priority_score` | FLOAT64 | Final priority score (0.0–1.0) |
+| `cluster_id` | STRING | Geo-cluster identifier |
+| `duplicate_count` | INT64 | Number of similar issues in cluster |
+| `classification_confidence` | FLOAT64 | AI classification confidence |
+| `model_provider` | STRING | AI model used (`stub` / `gemini` / `vertex`) |
 | `ingested_at` | TIMESTAMP | When record was added to BigQuery |
 
 **Partitioning:** By `created_at` (day)
