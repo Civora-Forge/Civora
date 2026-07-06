@@ -34,11 +34,12 @@ function LeafletMapPanel({ hotspots, wardMeta, height = 400, zoom = 12 }) {
     : defaultCenter;
 
   return (
-    <div style={{ borderRadius: 8, overflow: "hidden" }}>
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
       <MapContainer
         center={center}
         zoom={zoom}
         style={{ width: "100%", height }}
+        className="w-full"
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

@@ -134,12 +134,6 @@ function Dashboard() {
           const hotspotsData = await hotspotsRes.json();
           setHotspots(hotspotsData.hotspots || []);
         }
-
-        const projectsRes = await fetch(`${API_BASE_URL}/projects`);
-        if (projectsRes.ok) {
-          const data = await projectsRes.json();
-          if (data.projects?.length) setProjects(data.projects);
-        }
       } catch {
         setError("Couldn't reach backend. Is it running on port 5001?");
       } finally {

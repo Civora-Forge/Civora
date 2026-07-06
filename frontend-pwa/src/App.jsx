@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import ReportIssue from "./components/ReportIssue.jsx";
 import Dashboard from "./components/Dashboard.jsx";
-import "./styles/dashboard.css";
 
 function App() {
   const [view, setView] = useState("citizen");
