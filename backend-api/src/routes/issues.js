@@ -1,8 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { validateRawIssue } = require("../validators/issueValidator");
-const { addIssue, getAllIssues } = require("../services/issueStore");
-const { enrichIssue } = require("../../../ai-services/src/enrichIssue");
+const { submitIssue } = require("../services/issueService");
 
 router.post("/", async (req, res) => {
   const validation = validateRawIssue(req.body);
@@ -28,16 +27,14 @@ router.post("/", async (req, res) => {
     categoryHint: validation.data.categoryHint || "",
   };
 
-  const enrichedFields = await enrichIssue(rawIssue);
+  const result = await submitIssue(rawIssue);
 
-  const issue = {
-    ...rawIssue,
-    ...enrichedFields,
-  };
-
-  const stored = addIssue(issue);
-
-  return res.status(201).json({ ok: true, issueId: stored.id });
+  return res.status(201).json({
+    ok: true,
+    issueId: result.issueId,
+    priorityScore: result.priorityScore,
+    clusterId: result.clusterId,
+  });
 });
 
 module.exports = router;
