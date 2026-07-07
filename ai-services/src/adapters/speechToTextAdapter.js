@@ -6,7 +6,6 @@
  */
 const fs = require("fs");
 const path = require("path");
-const fetch = require("node-fetch");
 
 const DEFAULT_TIMEOUT_MS = process.env.SPEECH_TO_TEXT_TIMEOUT_MS
   ? parseInt(process.env.SPEECH_TO_TEXT_TIMEOUT_MS, 10)
@@ -176,7 +175,5 @@ async function transcribeAudio(audioInput, language) {
   console.error("transcribeAudio: all attempts failed", lastError && lastError.message ? lastError.message : lastError);
   return makeResult("", language || "", 0.0);
 }
-
-module.exports = { transcribeAudio };
 
 module.exports = { transcribeAudio };
