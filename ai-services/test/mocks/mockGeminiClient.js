@@ -37,6 +37,8 @@ async function generateGeminiClassificationText(input, prompt) {
       projectTitle: "Repair Pothole Near School",
       confidence: 0.91,
       issueTheme: "Road Repair",
+      recommendedDepartment: "Public Works Department",
+      justification: "The pothole is on a frequently used road near a school, creating a safety hazard for children and commuters. Repairing it will prevent accidents and reduce vehicle damage.",
     }),
     "```",
   ].join("\n");

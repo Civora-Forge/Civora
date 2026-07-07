@@ -34,15 +34,39 @@ const CATEGORY_THEME_MAP = {
   livelihood: "Livelihood Support",
 };
 
+const ALLOWED_DEPARTMENTS = new Set([
+  "public works department",
+  "electricity department",
+  "education department",
+  "health department",
+  "water authority",
+  "municipality",
+  "agriculture department",
+  "fisheries department",
+  "transport department",
+  "other",
+]);
+
+const CATEGORY_DEPARTMENT_MAP = {
+  roads: "Public Works Department",
+  schools: "Education Department",
+  health: "Health Department",
+  sanitation: "Municipality",
+  livelihood: "Agriculture Department",
+};
+
 function makeFallback(input) {
+  const category = normalizeCategory(input && input.categoryHint, "other");
   return {
-    category: normalizeCategory(input && input.categoryHint, "other"),
+    category,
     subcategory: "general",
     severity: "medium",
     summary: "Classification unavailable",
     projectTitle: "Classification unavailable",
     confidence: 0,
-    issueTheme: deriveThemeFromCategory(input && input.categoryHint),
+    issueTheme: deriveThemeFromCategory(category),
+    recommendedDepartment: deriveDepartmentFromCategory(category),
+    justification: "Unable to generate recommendation at this time.",
   };
 }
 
@@ -50,6 +74,12 @@ function deriveThemeFromCategory(category) {
   if (typeof category !== "string") return "Other";
   const normalized = category.trim().toLowerCase();
   return CATEGORY_THEME_MAP[normalized] || "Other";
+}
+
+function deriveDepartmentFromCategory(category) {
+  if (typeof category !== "string") return "Other";
+  const normalized = category.trim().toLowerCase();
+  return CATEGORY_DEPARTMENT_MAP[normalized] || "Other";
 }
 
 function normalizeCategory(value, fallback) {
@@ -111,6 +141,35 @@ function toTitleCase(str) {
   return str.replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+function normalizeRecommendedDepartment(value, category) {
+  if (typeof value !== "string") {
+    return deriveDepartmentFromCategory(category);
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return deriveDepartmentFromCategory(category);
+  }
+
+  const lowered = trimmed.toLowerCase();
+  for (const dept of ALLOWED_DEPARTMENTS) {
+    if (dept === lowered) {
+      return toTitleCase(dept);
+    }
+  }
+
+  return toTitleCase(trimmed);
+}
+
+function normalizeJustification(value) {
+  if (typeof value !== "string") {
+    return "Unable to generate recommendation at this time.";
+  }
+
+  const trimmed = value.trim();
+  return trimmed || "Unable to generate recommendation at this time.";
+}
+
 function normalizeTheme(value, category) {
   if (typeof value !== "string") {
     return deriveThemeFromCategory(category);
@@ -168,6 +227,8 @@ function validateAndNormalizeResponse(parsed, input) {
   const confidence = typeof parsed.confidence === "number" ? parsed.confidence : Number(parsed.confidence);
   const issueTheme = normalizeTheme(parsed.issueTheme, category);
   const projectTitle = normalizeProjectTitle(parsed.projectTitle, summary || parsed.reasoning);
+  const recommendedDepartment = normalizeRecommendedDepartment(parsed.recommendedDepartment, category);
+  const justification = normalizeJustification(parsed.justification);
 
   if (!summary) {
     return null;
@@ -185,6 +246,8 @@ function validateAndNormalizeResponse(parsed, input) {
     projectTitle,
     confidence,
     issueTheme,
+    recommendedDepartment,
+    justification,
   };
 }
 
