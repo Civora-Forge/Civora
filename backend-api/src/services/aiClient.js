@@ -10,22 +10,83 @@ const { enrichIssue: enrichIssueImpl } = require("../../../ai-services/src/enric
 
 const DEFAULT_TIMEOUT_MS = env.AI_ENRICHMENT_TIMEOUT_MS || 3000;
 
-function makeFallback(rawIssue, meta = {}) {
+function makeClassification(rawIssue) {
+  const category = rawIssue && rawIssue.categoryHint ? rawIssue.categoryHint : "roads";
+
   return {
-    finalCategory: rawIssue && rawIssue.categoryHint ? rawIssue.categoryHint : "roads",
+    category,
+    subcategory: "general",
     severity: "medium",
-    projectTitle: "Civic improvement project",
+    summary: "Civic improvement project",
+    confidence: 0,
+  };
+}
+
+function makeFallback(rawIssue, meta = {}) {
+  const classification = makeClassification(rawIssue);
+
+  return {
+    finalCategory: classification.category,
+    severity: classification.severity,
+    projectTitle: classification.summary,
     priorityScore: 0.5,
     wardId: (rawIssue && rawIssue.wardId) || "15",
+    classification,
     aiSignals: {
+      speechTranscript: "",
+      speechLanguage: (rawIssue && rawIssue.language) || "unknown",
+      speechConfidence: 0,
       translatedText: "",
       detectedLanguage: (rawIssue && rawIssue.language) || "unknown",
+      imageSummary: "",
+      imageObjects: [],
+      imagePossibleIssue: "",
+      imageConfidence: 0,
       photoFindings: [],
       classificationConfidence: 0,
       modelProvider: "fallback",
       _meta: meta,
     },
   };
+}
+
+function normalizeResult(result, rawIssue) {
+  const classification = result && result.classification ? result.classification : makeClassification(rawIssue);
+  const finalCategory = result && (result.finalCategory || result.category) ? (result.finalCategory || result.category) : classification.category;
+  const severity = result && result.severity ? result.severity : classification.severity;
+  const projectTitle = result && (result.projectTitle || result.summary) ? (result.projectTitle || result.summary) : classification.summary;
+
+  const normalized = {
+    ...result,
+    finalCategory,
+    severity,
+    projectTitle,
+    classification: {
+      category: classification.category || finalCategory || "roads",
+      subcategory: classification.subcategory || (result && result.subcategory) || "general",
+      severity: classification.severity || severity || "medium",
+      summary: classification.summary || projectTitle || "Civic improvement project",
+      confidence: typeof classification.confidence === "number" ? classification.confidence : Number(classification.confidence) || 0,
+    },
+  };
+
+  if (!normalized.aiSignals) {
+    normalized.aiSignals = {};
+  }
+
+  normalized.aiSignals.speechTranscript = normalized.aiSignals.speechTranscript || "";
+  normalized.aiSignals.speechLanguage = normalized.aiSignals.speechLanguage || (rawIssue && rawIssue.language) || "unknown";
+  normalized.aiSignals.speechConfidence = typeof normalized.aiSignals.speechConfidence === "number" ? normalized.aiSignals.speechConfidence : 0;
+  normalized.aiSignals.imageSummary = normalized.aiSignals.imageSummary || "";
+  normalized.aiSignals.imageObjects = Array.isArray(normalized.aiSignals.imageObjects) ? normalized.aiSignals.imageObjects : [];
+  normalized.aiSignals.imagePossibleIssue = normalized.aiSignals.imagePossibleIssue || "";
+  normalized.aiSignals.imageConfidence = typeof normalized.aiSignals.imageConfidence === "number" ? normalized.aiSignals.imageConfidence : 0;
+  normalized.aiSignals.photoFindings = Array.isArray(normalized.aiSignals.photoFindings) ? normalized.aiSignals.photoFindings : [];
+  normalized.aiSignals.classificationConfidence = typeof normalized.aiSignals.classificationConfidence === "number"
+    ? normalized.aiSignals.classificationConfidence
+    : normalized.classification.confidence || 0;
+
+  return normalized;
 }
 
 async function enrichIssue(rawIssue) {
@@ -52,15 +113,17 @@ async function enrichIssue(rawIssue) {
       return makeFallback(rawIssue, { reason: "timeout", timeoutMs: DEFAULT_TIMEOUT_MS, durationMs: duration });
     }
 
-    // Successful result — attach timing info to aiSignals if present.
     if (result && typeof result === "object") {
-      if (!result.aiSignals) result.aiSignals = {};
-      result.aiSignals._elapsedMs = duration;
-      result.aiSignals._provider = result.aiSignals.modelProvider || result.provider || result.aiSignals._provider || "unknown";
+      const normalized = normalizeResult(result, rawIssue);
+      normalized.aiSignals._elapsedMs = duration;
+      normalized.aiSignals._provider = normalized.aiSignals.modelProvider || normalized.provider || normalized.aiSignals._provider || "unknown";
+      normalized.aiSignals.modelProvider = normalized.aiSignals.modelProvider || normalized.aiSignals._provider;
+      console.log(`AI enrichment completed in ${duration}ms (provider=${normalized.aiSignals._provider})`);
+      return normalized;
     }
 
-    console.log(`AI enrichment completed in ${duration}ms (provider=${result.aiSignals?result.aiSignals._provider:'unknown'})`);
-    return result;
+    console.log(`AI enrichment completed in ${duration}ms (provider=${result && result.aiSignals ? result.aiSignals._provider : 'unknown'})`);
+    return makeFallback(rawIssue, { reason: "invalid_result" });
   } catch (err) {
     console.error("AI enrichment error:", err && err.message ? err.message : err);
     return makeFallback(rawIssue, { reason: "error", message: err && err.message });
