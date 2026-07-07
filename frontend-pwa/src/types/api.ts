@@ -1,4 +1,5 @@
-// Exact structures per backend-api/docs/frontend-handoff.md
+// Types matching actual backend response shapes.
+// Source of truth: shared/contracts.md
 
 export interface IssueSubmitRequest {
   text: string;
@@ -8,7 +9,7 @@ export interface IssueSubmitRequest {
   createdAt: string;
   photoUrl?: string;
   audioUrl?: string;
-  categoryHint?: string; // roads, schools, health, sanitation, livelihood, other
+  categoryHint?: string;
 }
 
 export interface IssueSubmitResponse {
@@ -16,6 +17,13 @@ export interface IssueSubmitResponse {
   issueId?: string;
   priorityScore?: number;
   clusterId?: string;
+  clusterSummary?: string;
+  explanation?: string[];
+  projectTitle?: string;
+  issueTheme?: string;
+  recommendedDepartment?: string;
+  finalCategory?: string;
+  severity?: string;
   error?: {
     code: string;
     message: string;
@@ -71,4 +79,15 @@ export interface Hotspot {
 
 export interface HotspotsResponse {
   hotspots: Hotspot[];
+}
+
+export interface SeedResponse {
+  ok: boolean;
+  inserted: number;
+  message: string;
+}
+
+export interface ClearResponse {
+  ok: boolean;
+  message: string;
 }
