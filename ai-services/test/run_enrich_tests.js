@@ -56,6 +56,8 @@ async function run() {
         projectTitle: input.imageSummary ? "Repair Pothole Near Drain" : "Fix Broken Street Light",
         confidence: 0.94,
         issueTheme: "Road Repair",
+        recommendedDepartment: "Public Works Department",
+        justification: "Persistent road damage in this area affects daily commuters and requires immediate attention.",
       };
     },
   });
@@ -89,6 +91,10 @@ async function run() {
       assert.strictEqual(noMedia.aiSignals.imageSummary, "", "noMedia: imageSummary should be empty");
       assert.strictEqual(noMedia.issueTheme, "Road Repair", "noMedia: issueTheme mismatch");
       assert.strictEqual(noMedia.classification.issueTheme, "Road Repair", "noMedia: classification.issueTheme mismatch");
+      assert.strictEqual(noMedia.recommendedDepartment, "Public Works Department", "noMedia: recommendedDepartment mismatch");
+      assert.strictEqual(noMedia.classification.recommendedDepartment, "Public Works Department", "noMedia: classification.recommendedDepartment mismatch");
+      assert.strictEqual(noMedia.justification, "Persistent road damage in this area affects daily commuters and requires immediate attention.", "noMedia: justification mismatch");
+      assert.strictEqual(noMedia.classification.justification, "Persistent road damage in this area affects daily commuters and requires immediate attention.", "noMedia: classification.justification mismatch");
       console.log("[PASS] enrichIssue no-media scenario");
     } catch (err) {
       failures += 1;
@@ -125,6 +131,10 @@ async function run() {
       assert.strictEqual(full.classification.summary, "Pothole on the road near a drain", "full: classification.summary mismatch");
       assert.strictEqual(full.issueTheme, "Road Repair", "full: issueTheme mismatch");
       assert.strictEqual(full.classification.issueTheme, "Road Repair", "full: classification.issueTheme mismatch");
+      assert.strictEqual(full.recommendedDepartment, "Public Works Department", "full: recommendedDepartment mismatch");
+      assert.strictEqual(full.classification.recommendedDepartment, "Public Works Department", "full: classification.recommendedDepartment mismatch");
+      assert.strictEqual(full.justification, "Persistent road damage in this area affects daily commuters and requires immediate attention.", "full: justification mismatch");
+      assert.strictEqual(full.classification.justification, "Persistent road damage in this area affects daily commuters and requires immediate attention.", "full: classification.justification mismatch");
       console.log("[PASS] enrichIssue full pipeline scenario");
     } catch (err) {
       failures += 1;
@@ -157,6 +167,10 @@ async function run() {
       assert.strictEqual(translated.classification.summary, "translated text", "translated: classification.summary mismatch");
       assert.strictEqual(translated.issueTheme, "Road Repair", "translated: issueTheme mismatch");
       assert.strictEqual(translated.classification.issueTheme, "Road Repair", "translated: classification.issueTheme mismatch");
+      assert.strictEqual(translated.recommendedDepartment, "Public Works Department", "translated: recommendedDepartment mismatch");
+      assert.strictEqual(translated.classification.recommendedDepartment, "Public Works Department", "translated: classification.recommendedDepartment mismatch");
+      assert.strictEqual(translated.justification, "Persistent road damage in this area affects daily commuters and requires immediate attention.", "translated: justification mismatch");
+      assert.strictEqual(translated.classification.justification, "Persistent road damage in this area affects daily commuters and requires immediate attention.", "translated: classification.justification mismatch");
       console.log("[PASS] enrichIssue translation scenario");
     } catch (err) {
       failures += 1;
