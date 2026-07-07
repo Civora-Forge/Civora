@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "main": "src/enrichIssue.js",
   "scripts": {
-    "test": "node test/run_tests.js && node test/run_translation_tests.js && node test/run_vision_tests.js && node test/run_gemini_tests.js"
+    "test": "node test/run_enrich_tests.js && node test/run_tests.js && node test/run_translation_tests.js && node test/run_vision_tests.js && node test/run_gemini_tests.js"
   },
   "dependencies": {
     "@google-cloud/speech": "^7.5.0",
