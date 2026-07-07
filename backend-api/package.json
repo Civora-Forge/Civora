@@ -4,7 +4,8 @@
   "version": "0.1.0",
   "scripts": {
     "dev": "node src/index.js",
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "test": "node test/run_issue_service_tests.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
