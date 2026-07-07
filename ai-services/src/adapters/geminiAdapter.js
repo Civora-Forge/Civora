@@ -11,6 +11,28 @@ const { buildClassificationPrompt } = require("../prompts/issueClassificationPro
 const DEFAULT_MODEL = process.env.GEMINI_CLASSIFICATION_MODEL || "gemini-1.5-flash";
 const ALLOWED_CATEGORIES = new Set(["roads", "schools", "health", "sanitation", "livelihood", "other"]);
 const ALLOWED_SEVERITIES = new Set(["low", "medium", "high"]);
+const ALLOWED_THEMES = new Set([
+  "road repair",
+  "school infrastructure",
+  "primary healthcare",
+  "water supply",
+  "drainage improvement",
+  "street lighting",
+  "waste management",
+  "sanitation",
+  "public health",
+  "livelihood support",
+  "traffic management",
+  "other",
+]);
+
+const CATEGORY_THEME_MAP = {
+  roads: "Road Repair",
+  schools: "School Infrastructure",
+  health: "Primary Healthcare",
+  sanitation: "Sanitation",
+  livelihood: "Livelihood Support",
+};
 
 function makeFallback(input) {
   return {
@@ -19,7 +41,14 @@ function makeFallback(input) {
     severity: "medium",
     summary: "Classification unavailable",
     confidence: 0,
+    issueTheme: deriveThemeFromCategory(input && input.categoryHint),
   };
+}
+
+function deriveThemeFromCategory(category) {
+  if (typeof category !== "string") return "Other";
+  const normalized = category.trim().toLowerCase();
+  return CATEGORY_THEME_MAP[normalized] || "Other";
 }
 
 function normalizeCategory(value, fallback) {
@@ -64,6 +93,30 @@ function normalizeSummary(value) {
   return value.trim();
 }
 
+function toTitleCase(str) {
+  return str.replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function normalizeTheme(value, category) {
+  if (typeof value !== "string") {
+    return deriveThemeFromCategory(category);
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return deriveThemeFromCategory(category);
+  }
+
+  const lowered = trimmed.toLowerCase();
+  for (const theme of ALLOWED_THEMES) {
+    if (theme === lowered) {
+      return toTitleCase(theme);
+    }
+  }
+
+  return toTitleCase(trimmed);
+}
+
 function parseJsonText(text) {
   if (!text || typeof text !== "string") {
     return null;
@@ -99,6 +152,7 @@ function validateAndNormalizeResponse(parsed, input) {
   const severity = normalizeSeverity(parsed.severity);
   const summary = normalizeSummary(parsed.summary || parsed.projectTitle || parsed.reasoning);
   const confidence = typeof parsed.confidence === "number" ? parsed.confidence : Number(parsed.confidence);
+  const issueTheme = normalizeTheme(parsed.issueTheme, category);
 
   if (!summary) {
     return null;
@@ -114,6 +168,7 @@ function validateAndNormalizeResponse(parsed, input) {
     severity,
     summary,
     confidence,
+    issueTheme,
   };
 }
 

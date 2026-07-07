@@ -54,6 +54,7 @@ async function run() {
         severity: "high",
         summary: input.imageSummary || input.translatedText,
         confidence: 0.94,
+        issueTheme: "Road Repair",
       };
     },
   });
@@ -83,6 +84,8 @@ async function run() {
       assert.strictEqual(noMedia.finalCategory, "roads", "noMedia: finalCategory mismatch");
       assert.strictEqual(noMedia.projectTitle, "Street light is broken", "noMedia: projectTitle should come from classification summary");
       assert.strictEqual(noMedia.aiSignals.imageSummary, "", "noMedia: imageSummary should be empty");
+      assert.strictEqual(noMedia.issueTheme, "Road Repair", "noMedia: issueTheme mismatch");
+      assert.strictEqual(noMedia.classification.issueTheme, "Road Repair", "noMedia: classification.issueTheme mismatch");
       console.log("[PASS] enrichIssue no-media scenario");
     } catch (err) {
       failures += 1;
@@ -114,6 +117,8 @@ async function run() {
       assert.strictEqual(full.aiSignals.imageSummary, "Pothole on the road near a drain", "full: image summary mismatch");
       assert.strictEqual(full.aiSignals.photoFindings.length, 3, "full: photo findings mismatch");
       assert.strictEqual(full.classification.subcategory, "pothole", "full: subcategory mismatch");
+      assert.strictEqual(full.issueTheme, "Road Repair", "full: issueTheme mismatch");
+      assert.strictEqual(full.classification.issueTheme, "Road Repair", "full: classification.issueTheme mismatch");
       console.log("[PASS] enrichIssue full pipeline scenario");
     } catch (err) {
       failures += 1;
@@ -141,6 +146,8 @@ async function run() {
       assert.strictEqual(callCounts.vision, 0, "translated: vision should be skipped");
       assert.strictEqual(callCounts.gemini, 1, "translated: classification should run once");
       assert.strictEqual(translated.aiSignals.translatedText, "translated text", "translated: translatedText mismatch");
+      assert.strictEqual(translated.issueTheme, "Road Repair", "translated: issueTheme mismatch");
+      assert.strictEqual(translated.classification.issueTheme, "Road Repair", "translated: classification.issueTheme mismatch");
       console.log("[PASS] enrichIssue translation scenario");
     } catch (err) {
       failures += 1;

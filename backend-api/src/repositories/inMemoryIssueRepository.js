@@ -7,6 +7,16 @@ async function addIssue(issue) {
   return stored;
 }
 
+async function updateIssue(id, patch) {
+  const index = issues.findIndex((issue) => issue.id === id);
+  if (index === -1) {
+    return null;
+  }
+
+  issues[index] = { ...issues[index], ...patch, id };
+  return issues[index];
+}
+
 async function getAllIssues() {
   return issues;
 }
@@ -20,4 +30,4 @@ async function clearIssues() {
   nextId = 1;
 }
 
-module.exports = { addIssue, getAllIssues, getIssueById, clearIssues };
+module.exports = { addIssue, updateIssue, getAllIssues, getIssueById, clearIssues };

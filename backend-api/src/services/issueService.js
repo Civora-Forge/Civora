@@ -23,6 +23,7 @@ async function submitIssue(rawIssue) {
   const issue = {
     ...rawIssue,
     ...enrichedFields,
+    clusterSummary: enrichedFields.clusterSummary || "",
     aiPriorityScore: enrichedFields.priorityScore || 0.5,
     backendPriorityScore: 0,
     priorityScore: 0,
@@ -48,8 +49,16 @@ async function submitIssue(rawIssue) {
   const stored = await repo.addIssue(issue);
 
   const allIssues = await repo.getAllIssues();
-  const { clusters, issueClusterMap } = assignClusterIds(allIssues);
-  const clusterInfo = issueClusterMap[stored.id] || { clusterId: "cluster_0", duplicateCount: 1 };
+  const { issueClusterMap } = assignClusterIds(allIssues, {
+    similarityThreshold: process.env.ISSUE_CLUSTER_SIMILARITY_THRESHOLD
+      ? parseFloat(process.env.ISSUE_CLUSTER_SIMILARITY_THRESHOLD)
+      : undefined,
+  });
+  const clusterInfo = issueClusterMap[stored.id] || {
+    clusterId: "cluster_0",
+    duplicateCount: 1,
+    clusterSummary: issue.clusterSummary || issue.projectTitle || "Civic improvement project",
+  };
 
   const wardCtx = getWardContext(stored.wardId);
   const context = {
@@ -63,18 +72,23 @@ async function submitIssue(rawIssue) {
   const backendPriorityScore = calculatePriorityScore(stored, context);
   const explanation = buildPriorityExplanation(stored, context);
 
-  stored.backendPriorityScore = backendPriorityScore;
-  stored.priorityScore = backendPriorityScore;
-  stored.clusterId = clusterInfo.clusterId;
-  stored.duplicateCount = clusterInfo.duplicateCount;
-  stored.priorityExplanation = explanation;
+  const updatedIssue = {
+    backendPriorityScore: backendPriorityScore,
+    priorityScore: backendPriorityScore,
+    clusterId: clusterInfo.clusterId,
+    clusterSummary: clusterInfo.clusterSummary || issue.clusterSummary || issue.projectTitle || "Civic improvement project",
+    duplicateCount: clusterInfo.duplicateCount,
+    priorityExplanation: explanation,
+  };
 
-  await repo.addIssue(stored);
+  const persisted = repo.updateIssue ? await repo.updateIssue(stored.id, updatedIssue) : null;
+  const finalStored = persisted || { ...stored, ...updatedIssue };
 
   return {
-    issueId: stored.id,
-    priorityScore: stored.priorityScore,
+    issueId: finalStored.id,
+    priorityScore: finalStored.priorityScore,
     clusterId: clusterInfo.clusterId,
+    clusterSummary: clusterInfo.clusterSummary || issue.clusterSummary || issue.projectTitle || "Civic improvement project",
     explanation,
   };
 }
