@@ -33,15 +33,16 @@ async function enrichIssue(rawIssue) {
 
   // Step 4: Classify using Gemini
   const classificationInput = {
-    text: textForClassification,
+    translatedText: textForClassification,
+    imageSummary: visionResult.summary || "",
     categoryHint,
   };
   const classificationResult = await classifyIssueWithGemini(classificationInput);
 
   return {
-    finalCategory: classificationResult.finalCategory || categoryHint || "roads",
+    finalCategory: classificationResult.category || classificationResult.finalCategory || categoryHint || "roads",
     severity: classificationResult.severity || "medium",
-    projectTitle: classificationResult.projectTitle || "Civic improvement project",
+    projectTitle: classificationResult.summary || classificationResult.projectTitle || "Civic improvement project",
     priorityScore: 0.5,
     wardId: rawIssue.wardId || "15",
     aiSignals: {
@@ -49,7 +50,7 @@ async function enrichIssue(rawIssue) {
       detectedLanguage: translationResult.detectedLanguage || language,
       photoFindings: visionResult.findings || [],
       classificationConfidence: classificationResult.confidence || 0,
-      modelProvider: classificationResult.provider || "stub",
+      modelProvider: classificationResult.provider || (process.env.GEMINI_API_KEY ? "gemini" : "stub"),
     },
   };
 }
