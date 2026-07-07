@@ -24,12 +24,15 @@ Return ONLY valid JSON with this exact structure:
   "category": "roads",
   "subcategory": "pothole",
   "severity": "medium",
-  "summary": "Damaged road with pothole near bus stop",
+  "summary": "Road contains multiple potholes causing unsafe travel",
+  "projectTitle": "Repair Road Near Bus Stand",
   "confidence": 0.85,
   "issueTheme": "Road Repair",
   "reasoning": "Brief explanation of classification."
 }
 
+The "summary" field is a brief description of the issue.
+The "projectTitle" field is a short, actionable development work label (e.g. "Repair Road Near Bus Stand", "Install Street Lights on Main Road"). It must be different from summary.
 The "issueTheme" field must be a short, normalized label representing the recurring development need. Choose from one of these standard themes or create a concise equivalent:
 - Road Repair
 - School Infrastructure

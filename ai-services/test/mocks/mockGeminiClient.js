@@ -34,6 +34,7 @@ async function generateGeminiClassificationText(input, prompt) {
       subcategory: "pothole",
       severity: "high",
       summary: "Damaged road surface with a visible pothole",
+      projectTitle: "Repair Pothole Near School",
       confidence: 0.91,
       issueTheme: "Road Repair",
     }),

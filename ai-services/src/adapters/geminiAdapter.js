@@ -40,6 +40,7 @@ function makeFallback(input) {
     subcategory: "general",
     severity: "medium",
     summary: "Classification unavailable",
+    projectTitle: "Classification unavailable",
     confidence: 0,
     issueTheme: deriveThemeFromCategory(input && input.categoryHint),
   };
@@ -91,6 +92,19 @@ function normalizeSummary(value) {
   }
 
   return value.trim();
+}
+
+function normalizeProjectTitle(value, fallbackSummary) {
+  if (typeof value !== "string") {
+    return normalizeSummary(fallbackSummary) || "";
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return normalizeSummary(fallbackSummary) || "";
+  }
+
+  return trimmed;
 }
 
 function toTitleCase(str) {
@@ -148,11 +162,12 @@ function validateAndNormalizeResponse(parsed, input) {
   }
 
   const category = normalizeCategory(parsed.category || parsed.finalCategory, input && input.categoryHint);
-  const subcategory = normalizeSubcategory(parsed.subcategory || parsed.issueType || parsed.projectTitle);
+  const subcategory = normalizeSubcategory(parsed.subcategory || parsed.issueType);
   const severity = normalizeSeverity(parsed.severity);
-  const summary = normalizeSummary(parsed.summary || parsed.projectTitle || parsed.reasoning);
+  const summary = normalizeSummary(parsed.summary || parsed.reasoning);
   const confidence = typeof parsed.confidence === "number" ? parsed.confidence : Number(parsed.confidence);
   const issueTheme = normalizeTheme(parsed.issueTheme, category);
+  const projectTitle = normalizeProjectTitle(parsed.projectTitle, summary || parsed.reasoning);
 
   if (!summary) {
     return null;
@@ -167,6 +182,7 @@ function validateAndNormalizeResponse(parsed, input) {
     subcategory,
     severity,
     summary,
+    projectTitle,
     confidence,
     issueTheme,
   };
