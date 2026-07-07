@@ -107,12 +107,13 @@ async function enrichIssue(rawIssue) {
 
   const finalCategory = classificationResult.category || classificationResult.finalCategory || categoryHint || "roads";
   const finalSummary = classificationResult.summary || classificationResult.projectTitle || "Civic improvement project";
+  const finalTitle = classificationResult.projectTitle || classificationResult.summary || "Civic improvement project";
   const finalTheme = classificationResult.issueTheme || "";
 
   const enrichedIssue = {
     finalCategory,
     severity: classificationResult.severity || "medium",
-    projectTitle: finalSummary,
+    projectTitle: finalTitle,
     issueTheme: finalTheme,
     priorityScore: 0.5,
     wardId: safeIssue.wardId || "15",
@@ -135,6 +136,7 @@ async function enrichIssue(rawIssue) {
       subcategory: classificationResult.subcategory || "general",
       severity: classificationResult.severity || "medium",
       summary: finalSummary,
+      projectTitle: finalTitle,
       confidence: classificationResult.confidence || 0,
       issueTheme: finalTheme,
     },

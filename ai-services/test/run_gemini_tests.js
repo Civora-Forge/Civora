@@ -21,6 +21,7 @@ async function run() {
     assert.strictEqual(normal.severity, "high", "normal: severity mismatch");
     assert.strictEqual(normal.summary, "Damaged road surface with a visible pothole", "normal: summary mismatch");
     assert.strictEqual(normal.confidence, 0.91, "normal: confidence mismatch");
+    assert.strictEqual(normal.projectTitle, "Repair Pothole Near School", "normal: projectTitle mismatch");
     assert.strictEqual(normal.issueTheme, "Road Repair", "normal: issueTheme mismatch");
     console.log("[PASS] gemini normal scenario");
   } catch (err) {
@@ -40,6 +41,7 @@ async function run() {
     assert.strictEqual(malformed.subcategory, "general", "malformed: subcategory fallback mismatch");
     assert.strictEqual(malformed.severity, "medium", "malformed: severity fallback mismatch");
     assert.strictEqual(malformed.summary, "Classification unavailable", "malformed: summary fallback mismatch");
+    assert.strictEqual(malformed.projectTitle, "Classification unavailable", "malformed: projectTitle fallback mismatch");
     assert.strictEqual(malformed.confidence, 0, "malformed: confidence fallback mismatch");
     assert.strictEqual(malformed.issueTheme, "Sanitation", "malformed: issueTheme fallback mismatch");
     console.log("[PASS] gemini malformed_json scenario");
@@ -59,6 +61,7 @@ async function run() {
     assert.strictEqual(invalidSchema.category, "health", "invalid_schema: category fallback mismatch");
     assert.strictEqual(invalidSchema.subcategory, "general", "invalid_schema: subcategory fallback mismatch");
     assert.strictEqual(invalidSchema.summary, "Classification unavailable", "invalid_schema: summary fallback mismatch");
+    assert.strictEqual(invalidSchema.projectTitle, "Classification unavailable", "invalid_schema: projectTitle fallback mismatch");
     assert.strictEqual(invalidSchema.confidence, 0, "invalid_schema: confidence fallback mismatch");
     assert.strictEqual(invalidSchema.issueTheme, "Primary Healthcare", "invalid_schema: issueTheme fallback mismatch");
     console.log("[PASS] gemini invalid_schema scenario");
@@ -78,6 +81,7 @@ async function run() {
     assert.strictEqual(apiFailure.category, "roads", "api_failure: category fallback mismatch");
     assert.strictEqual(apiFailure.subcategory, "general", "api_failure: subcategory fallback mismatch");
     assert.strictEqual(apiFailure.summary, "Classification unavailable", "api_failure: summary fallback mismatch");
+    assert.strictEqual(apiFailure.projectTitle, "Classification unavailable", "api_failure: projectTitle fallback mismatch");
     assert.strictEqual(apiFailure.confidence, 0, "api_failure: confidence fallback mismatch");
     assert.strictEqual(apiFailure.issueTheme, "Road Repair", "api_failure: issueTheme fallback mismatch");
     console.log("[PASS] gemini api_failure scenario");

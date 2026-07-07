@@ -53,6 +53,7 @@ async function run() {
         subcategory: input.imageSummary ? "pothole" : "general",
         severity: "high",
         summary: input.imageSummary || input.translatedText,
+        projectTitle: input.imageSummary ? "Repair Pothole Near Drain" : "Fix Broken Street Light",
         confidence: 0.94,
         issueTheme: "Road Repair",
       };
@@ -82,7 +83,9 @@ async function run() {
       assert.strictEqual(callCounts.vision, 0, "noMedia: vision should be skipped");
       assert.strictEqual(callCounts.gemini, 1, "noMedia: classification should run once");
       assert.strictEqual(noMedia.finalCategory, "roads", "noMedia: finalCategory mismatch");
-      assert.strictEqual(noMedia.projectTitle, "Street light is broken", "noMedia: projectTitle should come from classification summary");
+      assert.strictEqual(noMedia.projectTitle, "Fix Broken Street Light", "noMedia: projectTitle should come from dedicated field");
+      assert.strictEqual(noMedia.classification.summary, "Street light is broken", "noMedia: classification.summary mismatch");
+      assert.strictEqual(noMedia.classification.projectTitle, "Fix Broken Street Light", "noMedia: classification.projectTitle mismatch");
       assert.strictEqual(noMedia.aiSignals.imageSummary, "", "noMedia: imageSummary should be empty");
       assert.strictEqual(noMedia.issueTheme, "Road Repair", "noMedia: issueTheme mismatch");
       assert.strictEqual(noMedia.classification.issueTheme, "Road Repair", "noMedia: classification.issueTheme mismatch");
@@ -117,6 +120,9 @@ async function run() {
       assert.strictEqual(full.aiSignals.imageSummary, "Pothole on the road near a drain", "full: image summary mismatch");
       assert.strictEqual(full.aiSignals.photoFindings.length, 3, "full: photo findings mismatch");
       assert.strictEqual(full.classification.subcategory, "pothole", "full: subcategory mismatch");
+      assert.strictEqual(full.projectTitle, "Repair Pothole Near Drain", "full: projectTitle mismatch");
+      assert.strictEqual(full.classification.projectTitle, "Repair Pothole Near Drain", "full: classification.projectTitle mismatch");
+      assert.strictEqual(full.classification.summary, "Pothole on the road near a drain", "full: classification.summary mismatch");
       assert.strictEqual(full.issueTheme, "Road Repair", "full: issueTheme mismatch");
       assert.strictEqual(full.classification.issueTheme, "Road Repair", "full: classification.issueTheme mismatch");
       console.log("[PASS] enrichIssue full pipeline scenario");
@@ -146,6 +152,9 @@ async function run() {
       assert.strictEqual(callCounts.vision, 0, "translated: vision should be skipped");
       assert.strictEqual(callCounts.gemini, 1, "translated: classification should run once");
       assert.strictEqual(translated.aiSignals.translatedText, "translated text", "translated: translatedText mismatch");
+      assert.strictEqual(translated.projectTitle, "Fix Broken Street Light", "translated: projectTitle mismatch");
+      assert.strictEqual(translated.classification.projectTitle, "Fix Broken Street Light", "translated: classification.projectTitle mismatch");
+      assert.strictEqual(translated.classification.summary, "translated text", "translated: classification.summary mismatch");
       assert.strictEqual(translated.issueTheme, "Road Repair", "translated: issueTheme mismatch");
       assert.strictEqual(translated.classification.issueTheme, "Road Repair", "translated: classification.issueTheme mismatch");
       console.log("[PASS] enrichIssue translation scenario");
