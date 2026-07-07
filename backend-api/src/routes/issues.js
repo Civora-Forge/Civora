@@ -35,6 +35,12 @@ router.post("/", async (req, res) => {
     priorityScore: result.priorityScore,
     clusterId: result.clusterId,
     clusterSummary: result.clusterSummary,
+    explanation: result.explanation || [],
+    projectTitle: result.projectTitle || "",
+    issueTheme: result.issueTheme || "",
+    recommendedDepartment: result.recommendedDepartment || "",
+    finalCategory: result.finalCategory || "",
+    severity: result.severity || "",
   });
 });
 

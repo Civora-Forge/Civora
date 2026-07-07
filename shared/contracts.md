@@ -1,4 +1,4 @@
-This file is the single source of truth for shared schemas and API shapes. Edit only after team sync.
+Single source of truth for shared schemas and API shapes. Edit only after team sync.
 
 ---
 
@@ -22,64 +22,51 @@ This file is the single source of truth for shared schemas and API shapes. Edit 
 | Field | Type | Description |
 |-------|------|-------------|
 | `finalCategory` | string | AI-determined category |
-| `severity` | string | Estimated severity level |
+| `severity` | string | `low` / `medium` / `high` |
 | `projectTitle` | string | Auto-generated project title |
+| `issueTheme` | string | e.g. "Road Repair", "Primary Healthcare" |
+| `recommendedDepartment` | string | e.g. "Public Works Department" |
+| `justification` | string | AI justification for classification |
 | `wardId` | string | Mapped ward identifier |
-| `aiPriorityScore` | number | AI-assigned priority (0.0–1.0) |
-| `backendPriorityScore` | number | Backend-calculated priority (0.0–1.0) |
-| `priorityScore` | number | Final priority score (0.0–1.0) |
+| `aiPriorityScore` | number | AI-assigned priority (0.0-1.0) |
+| `backendPriorityScore` | number | Backend-calculated priority (0.0-1.0) |
+| `priorityScore` | number | Final priority score (0.0-1.0) |
 | `clusterId` | string | Geo-cluster identifier |
+| `clusterSummary` | string | Human-readable cluster description |
 | `duplicateCount` | number | Number of similar issues in cluster |
-| `priorityExplanation` | array | Human-readable priority reasons |
+| `priorityExplanation` | string[] | Human-readable priority reasons |
 
 ### AI Signals
 
 | Field | Type | Description |
 |-------|------|-------------|
+| `aiSignals.speechTranscript` | string | Transcribed audio text |
+| `aiSignals.speechLanguage` | string | Detected speech language |
+| `aiSignals.speechConfidence` | number | Speech transcription confidence |
 | `aiSignals.translatedText` | string | Translated text (if applicable) |
 | `aiSignals.detectedLanguage` | string | Detected language code |
-| `aiSignals.photoFindings` | array | Photo analysis results |
-| `aiSignals.classificationConfidence` | number | AI classification confidence |
+| `aiSignals.imageSummary` | string | Photo analysis summary |
+| `aiSignals.imageObjects` | string[] | Detected objects in photo |
+| `aiSignals.imagePossibleIssue` | string | AI-detected issue from photo |
+| `aiSignals.imageConfidence` | number | Image analysis confidence |
+| `aiSignals.photoFindings` | string[] | Photo analysis results |
+| `aiSignals.classificationConfidence` | number | Classification confidence |
 | `aiSignals.modelProvider` | string | `stub` / `gemini` / `vertex` |
 
-### System Fields
+### Classification Object
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `id` | string | Auto-generated unique ID |
+| `classification.category` | string | Classified category |
+| `classification.subcategory` | string | Subcategory |
+| `classification.severity` | string | Severity level |
+| `classification.summary` | string | Classification summary |
+| `classification.confidence` | number | Confidence score |
+| `classification.issueTheme` | string | Issue theme |
+| `classification.recommendedDepartment` | string | Recommended department |
+| `classification.justification` | string | Classification justification |
 
-### Full Issue JSON Example
-
-```json
-{
-  "id": "issue_1",
-  "text": "Road is damaged near the bus stop",
-  "language": "en",
-  "photoUrl": "https://example.com/photo.jpg",
-  "audioUrl": "",
-  "latitude": 8.5241,
-  "longitude": 76.9366,
-  "createdAt": "2026-07-06T12:00:00Z",
-  "categoryHint": "roads",
-  "finalCategory": "roads",
-  "severity": "medium",
-  "projectTitle": "Road repair request near reported location",
-  "aiPriorityScore": 0.72,
-  "backendPriorityScore": 0.82,
-  "priorityScore": 0.82,
-  "wardId": "15",
-  "clusterId": "cluster_1",
-  "duplicateCount": 2,
-  "priorityExplanation": ["Severity is marked as medium", "Multiple similar reports were found nearby"],
-  "aiSignals": {
-    "translatedText": "",
-    "detectedLanguage": "en",
-    "photoFindings": [],
-    "classificationConfidence": 0.78,
-    "modelProvider": "stub"
-  }
-}
-```
+---
 
 ## Shared Enums
 
@@ -88,11 +75,34 @@ category = roads | schools | health | sanitation | livelihood | other
 severity = low | medium | high
 ```
 
+---
+
 ## API Contracts
+
+Base URL: `http://localhost:5001`
+
+### GET /
+
+Health check.
+
+```json
+{
+  "ok": true,
+  "service": "Civora backend API",
+  "version": "0.3.0",
+  "environment": "development",
+  "repository": "memory",
+  "aiEnrichment": "stub",
+  "bigqueryExport": "disabled",
+  "endpoints": ["POST /issues", "GET /summary", "GET /hotspots"]
+}
+```
+
+---
 
 ### POST /issues
 
-Submit a new civic issue.
+Submit a new civic issue. Returns enriched result with AI classification, priority scoring, and clustering.
 
 **Request:**
 
@@ -100,7 +110,7 @@ Submit a new civic issue.
 {
   "text": "Road is damaged near the bus stop",
   "language": "en",
-  "photoUrl": "https://example.com/photo.jpg",
+  "photoUrl": "",
   "audioUrl": "",
   "latitude": 8.5241,
   "longitude": 76.9366,
@@ -109,14 +119,34 @@ Submit a new civic issue.
 }
 ```
 
-**Response:**
+**Response (201):**
 
 ```json
 {
   "ok": true,
   "issueId": "issue_1",
   "priorityScore": 0.82,
-  "clusterId": "cluster_1"
+  "clusterId": "cluster_1",
+  "clusterSummary": "Road repair request near reported location",
+  "explanation": ["Severity is marked as medium", "Multiple similar reports were found nearby"],
+  "projectTitle": "Road repair request near reported location",
+  "issueTheme": "Road Repair",
+  "recommendedDepartment": "Public Works Department",
+  "finalCategory": "roads",
+  "severity": "medium"
+}
+```
+
+**Error Response (400):**
+
+```json
+{
+  "ok": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Invalid issue payload",
+    "details": [...]
+  }
 }
 ```
 
@@ -124,7 +154,7 @@ Submit a new civic issue.
 
 ### GET /summary
 
-Get aggregated issue statistics for the MP dashboard.
+Aggregated issue statistics for the MP dashboard.
 
 **Response:**
 
@@ -161,7 +191,7 @@ Get aggregated issue statistics for the MP dashboard.
 
 ### GET /hotspots
 
-Get map-ready hotspot data for the MP dashboard.
+Map-ready hotspot data for the MP dashboard.
 
 **Response:**
 
@@ -181,5 +211,36 @@ Get map-ready hotspot data for the MP dashboard.
       "explanation": ["Severity is marked as medium", "Multiple similar reports were found nearby"]
     }
   ]
+}
+```
+
+---
+
+### POST /dev/seed (dev only)
+
+Seed 10 demo issues.
+
+**Response:**
+
+```json
+{
+  "ok": true,
+  "inserted": 10,
+  "message": "Demo issues seeded successfully"
+}
+```
+
+---
+
+### DELETE /dev/clear (dev only)
+
+Clear all issues from memory.
+
+**Response:**
+
+```json
+{
+  "ok": true,
+  "message": "Demo issues cleared successfully"
 }
 ```

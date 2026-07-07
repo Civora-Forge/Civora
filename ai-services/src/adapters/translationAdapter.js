@@ -2,7 +2,8 @@
  * Translation Adapter
  *
  * Provides text translation using Google Cloud Translation API.
- * Runs in stub mode by default.
+ * Runs in stub mode by default. The Google Cloud dependency is lazy-loaded
+ * only when real translation mode is enabled via GEMINI_API_KEY.
  */
 const DEFAULT_TIMEOUT_MS = process.env.TRANSLATION_TIMEOUT_MS
   ? parseInt(process.env.TRANSLATION_TIMEOUT_MS, 10)
@@ -34,21 +35,26 @@ function makeResult(language, translatedText, originalText) {
   };
 }
 
+// Lazy-load the Google Cloud Translate client only when real mode is active.
+// In stub mode (no GEMINI_API_KEY), this is never called.
+let translateClientSingleton = null;
+function getTranslateClient() {
+  if (translateClientSingleton) return translateClientSingleton;
+  try {
+    // eslint-disable-next-line global-require
+    const { Translate } = require("@google-cloud/translate").v2;
+    translateClientSingleton = new Translate();
+    return translateClientSingleton;
+  } catch (err) {
+    throw new Error("google_translate_client_unavailable");
+  }
+}
+
 async function callGoogleTranslate(text, sourceLanguage, client) {
-  // Use v2 client if available (simple detect + translate methods)
-  const translateClient = client || (() => {
-    try {
-      // eslint-disable-next-line global-require
-      const { Translate } = require("@google-cloud/translate").v2;
-      return new Translate();
-    } catch (err) {
-      throw new Error("google_translate_client_unavailable");
-    }
-  })();
+  const translateClient = client || getTranslateClient();
 
   let detectedLanguage = sourceLanguage || "";
   if (!sourceLanguage) {
-    // detect language
     const [detection] = await translateClient.detect(text);
     if (Array.isArray(detection)) {
       detectedLanguage = detection[0] && detection[0].language ? detection[0].language : "";
@@ -60,11 +66,9 @@ async function callGoogleTranslate(text, sourceLanguage, client) {
   if (!detectedLanguage) detectedLanguage = "";
 
   if (detectedLanguage.toLowerCase() === "en" || detectedLanguage.toLowerCase().startsWith("en")) {
-    // no translation needed
     return makeResult("en", text, text);
   }
 
-  // Translate to English
   const [translation] = await translateClient.translate(text, "en");
   const translatedText = typeof translation === "string" ? translation : (translation && translation[0]) || "";
 
@@ -123,7 +127,5 @@ async function translateToEnglish(text, sourceLanguage) {
   console.error("translateToEnglish: all attempts failed", lastError && lastError.message ? lastError.message : lastError);
   return makeResult(sourceLanguage || "", text, text);
 }
-
-module.exports = { translateToEnglish };
 
 module.exports = { translateToEnglish };
