@@ -35,6 +35,7 @@ async function generateGeminiClassificationText(input, prompt) {
       severity: "high",
       summary: "Damaged road surface with a visible pothole",
       confidence: 0.91,
+      issueTheme: "Road Repair",
     }),
     "```",
   ].join("\n");

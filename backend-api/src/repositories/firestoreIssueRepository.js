@@ -52,6 +52,23 @@ async function addIssue(issue) {
   return stored;
 }
 
+async function updateIssue(id, patch) {
+  initializeFirebase();
+  if (!db) {
+    throw new Error("Firestore not available");
+  }
+
+  const docRef = db.collection("issues").doc(id);
+  const snapshot = await docRef.get();
+  if (!snapshot.exists) {
+    return null;
+  }
+
+  const updated = { id, ...snapshot.data(), ...patch };
+  await docRef.set(updated, { merge: true });
+  return updated;
+}
+
 async function getAllIssues() {
   initializeFirebase();
   if (!db) {
@@ -73,4 +90,4 @@ async function getIssueById(id) {
   return { id: doc.id, ...doc.data() };
 }
 
-module.exports = { addIssue, getAllIssues, getIssueById };
+module.exports = { addIssue, updateIssue, getAllIssues, getIssueById };

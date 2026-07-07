@@ -34,6 +34,7 @@ router.post("/", async (req, res) => {
     issueId: result.issueId,
     priorityScore: result.priorityScore,
     clusterId: result.clusterId,
+    clusterSummary: result.clusterSummary,
   });
 });
 

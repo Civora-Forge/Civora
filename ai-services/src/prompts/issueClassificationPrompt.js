@@ -26,8 +26,23 @@ Return ONLY valid JSON with this exact structure:
   "severity": "medium",
   "summary": "Damaged road with pothole near bus stop",
   "confidence": 0.85,
+  "issueTheme": "Road Repair",
   "reasoning": "Brief explanation of classification."
 }
+
+The "issueTheme" field must be a short, normalized label representing the recurring development need. Choose from one of these standard themes or create a concise equivalent:
+- Road Repair
+- School Infrastructure
+- Primary Healthcare
+- Water Supply
+- Drainage Improvement
+- Street Lighting
+- Waste Management
+- Sanitation
+- Public Health
+- Livelihood Support
+- Traffic Management
+- Other
 
 Do not include chain-of-thought. Do not include markdown or code fences. Only return the JSON.
 
