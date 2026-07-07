@@ -1,20 +1,14 @@
 /**
  * Issue Classification Prompt for Gemini
  *
- * This prompt template is used to classify civic issues into categories
- * and estimate severity using Gemini or Vertex AI.
+ * This prompt template is used to classify and plan for civic issues
+ * using Gemini or Vertex AI.
  */
 
 function buildClassificationPrompt(translatedText, imageSummary = "", categoryHint = "") {
-  return `You are a civic issue classifier for a local government system.
+  return `You are a constituency development planning assistant for a local government system.
 
-Classify the following citizen report into one of these categories:
-- roads: road damage, potholes, street lighting, traffic
-- schools: school infrastructure, education facilities
-- health: health centers, medical facilities, public health
-- sanitation: waste management, drainage, water supply
-- livelihood: employment, markets, agriculture, fisheries
-- other: anything else
+Analyze the following citizen report and produce a structured development recommendation by mapping the issue to a category, subcategory, severity, summary, theme, project title, responsible department, and justification.
 
 Use the optional image summary as supporting evidence when present.
 Use the category hint as a weak prior, not as a certainty.
@@ -25,43 +19,68 @@ Return ONLY valid JSON with this exact structure:
   "subcategory": "pothole",
   "severity": "medium",
   "summary": "Road contains multiple potholes causing unsafe travel",
-  "projectTitle": "Repair Road Near Bus Stand",
-  "confidence": 0.85,
   "issueTheme": "Road Repair",
+  "projectTitle": "Repair Road Near Bus Stand",
   "recommendedDepartment": "Public Works Department",
   "justification": "Repeated complaints about the same stretch indicate a growing safety hazard affecting daily commuters. Prioritising this will reduce vehicle damage and prevent accidents.",
-  "reasoning": "Brief explanation of classification."
+  "confidence": 0.85
 }
 
-The "summary" field is a brief description of the issue.
-The "projectTitle" field is a short, actionable development work label (e.g. "Repair Road Near Bus Stand", "Install Street Lights on Main Road"). It must be different from summary.
-The "issueTheme" field must be a short, normalized label representing the recurring development need. Choose from one of these standard themes or create a concise equivalent:
-- Road Repair
-- School Infrastructure
-- Primary Healthcare
-- Water Supply
-- Drainage Improvement
-- Street Lighting
-- Waste Management
-- Sanitation
-- Public Health
-- Livelihood Support
-- Traffic Management
-- Other
+Field guidelines:
 
-The "recommendedDepartment" field must be the government department most likely responsible. Choose from:
-- Public Works Department
-- Electricity Department
-- Education Department
-- Health Department
-- Water Authority
-- Municipality
-- Agriculture Department
-- Fisheries Department
-- Transport Department
-- Other
+category
+- One of the supported civic categories: roads, schools, health, sanitation, livelihood, other.
 
-The "justification" field must be 1-2 concise sentences explaining why this issue should be prioritised, based on the description, severity, theme, and likely public impact. Do not invent statistics.
+subcategory
+- A more specific classification within the category (e.g. pothole, drainage, staff shortage).
+
+severity
+- One of: Low, Medium, High.
+
+summary
+- A concise 1-2 sentence description of the reported issue.
+
+issueTheme
+- A normalized development theme shared by similar reports.
+- Examples:
+  - Road Repair
+  - Water Supply
+  - School Infrastructure
+  - Street Lighting
+  - Primary Healthcare
+  - Drainage Improvement
+
+projectTitle
+- A short, actionable development work suitable for display on an MP dashboard.
+- Examples:
+  - Repair Road Near Bus Stand
+  - Upgrade Primary Health Centre
+  - Install Street Lights in Ward 5
+  - Improve Village Drainage System
+
+recommendedDepartment
+- Return the government department primarily responsible for addressing the issue.
+- Use standardized department names whenever possible.
+- Examples:
+  - Road Repair → Public Works Department
+  - Street Lighting → Electricity Department
+  - School Infrastructure → Education Department
+  - Primary Healthcare → Health Department
+  - Water Supply → Water Authority
+  - Drainage Improvement → Municipality
+  - Waste Management → Municipality
+
+justification
+- Explain in one or two concise sentences why this development work should be prioritized.
+- Base the explanation only on:
+  - the citizen submission,
+  - the detected severity,
+  - the identified issue theme,
+  - and the likely public impact.
+- Do NOT invent statistics, population figures, or facts not present in the input.
+
+confidence
+- Decimal between 0.0 and 1.0.
 
 Do not include chain-of-thought. Do not include markdown or code fences. Only return the JSON.
 
