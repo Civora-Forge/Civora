@@ -10,6 +10,39 @@ const { translateToEnglish } = require("./adapters/translationAdapter");
 const { transcribeAudio } = require("./adapters/speechToTextAdapter");
 const { analyzeIssuePhoto } = require("./adapters/visionAdapter");
 
+function deriveDefaultProjectTitle(category) {
+  switch (category) {
+    case "roads": return "Road repair request";
+    case "schools": return "School infrastructure request";
+    case "health": return "Health service improvement request";
+    case "sanitation": return "Sanitation improvement request";
+    case "livelihood": return "Livelihood support request";
+    default: return "Civic improvement request";
+  }
+}
+
+function deriveThemeFromCategory(category) {
+  switch (category) {
+    case "roads": return "Road Repair";
+    case "schools": return "School Infrastructure";
+    case "health": return "Health Access";
+    case "sanitation": return "Sanitation";
+    case "livelihood": return "Livelihood Support";
+    default: return "Civic Improvement";
+  }
+}
+
+function deriveDepartmentFromCategory(category) {
+  switch (category) {
+    case "roads": return "Public Works Department";
+    case "schools": return "Education Department";
+    case "health": return "Health Department";
+    case "sanitation": return "Sanitation Department";
+    case "livelihood": return "Local Development Office";
+    default: return "Constituency Development Office";
+  }
+}
+
 function logStep(message, details) {
   if (details) {
     console.log(`[enrichIssue] ${message}`, details);
@@ -106,11 +139,17 @@ async function enrichIssue(rawIssue) {
   });
 
   const finalCategory = classificationResult.category || classificationResult.finalCategory || categoryHint || "roads";
-  const finalSummary = classificationResult.summary || classificationResult.projectTitle || "Civic improvement project";
-  const finalTitle = classificationResult.projectTitle || classificationResult.summary || "Civic improvement project";
-  const finalTheme = classificationResult.issueTheme || "";
-  const finalDepartment = classificationResult.recommendedDepartment || "";
-  const finalJustification = classificationResult.justification || "";
+  const rawSummary = classificationResult.summary || classificationResult.projectTitle || "";
+  const finalSummary = rawSummary && rawSummary !== "Classification unavailable"
+    ? rawSummary
+    : `Civic improvement request`;
+  const rawTitle = classificationResult.projectTitle || classificationResult.summary || "";
+  const finalTitle = rawTitle && rawTitle !== "Classification unavailable"
+    ? rawTitle
+    : deriveDefaultProjectTitle(finalCategory);
+  const finalTheme = classificationResult.issueTheme || deriveThemeFromCategory(finalCategory);
+  const finalDepartment = classificationResult.recommendedDepartment || deriveDepartmentFromCategory(finalCategory);
+  const finalJustification = classificationResult.justification || "Unable to generate recommendation at this time.";
 
   const enrichedIssue = {
     finalCategory,

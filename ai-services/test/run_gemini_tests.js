@@ -42,8 +42,8 @@ async function run() {
     assert.strictEqual(malformed.category, "sanitation", "malformed: category fallback mismatch");
     assert.strictEqual(malformed.subcategory, "general", "malformed: subcategory fallback mismatch");
     assert.strictEqual(malformed.severity, "medium", "malformed: severity fallback mismatch");
-    assert.strictEqual(malformed.summary, "Classification unavailable", "malformed: summary fallback mismatch");
-    assert.strictEqual(malformed.projectTitle, "Classification unavailable", "malformed: projectTitle fallback mismatch");
+    assert.strictEqual(malformed.summary, "Sanitation improvement request", "malformed: summary fallback mismatch");
+    assert.strictEqual(malformed.projectTitle, "Sanitation improvement request", "malformed: projectTitle fallback mismatch");
     assert.strictEqual(malformed.confidence, 0, "malformed: confidence fallback mismatch");
     assert.strictEqual(malformed.issueTheme, "Sanitation", "malformed: issueTheme fallback mismatch");
     assert.strictEqual(malformed.recommendedDepartment, "Municipality", "malformed: recommendedDepartment fallback mismatch");
@@ -64,8 +64,8 @@ async function run() {
   try {
     assert.strictEqual(invalidSchema.category, "health", "invalid_schema: category fallback mismatch");
     assert.strictEqual(invalidSchema.subcategory, "general", "invalid_schema: subcategory fallback mismatch");
-    assert.strictEqual(invalidSchema.summary, "Classification unavailable", "invalid_schema: summary fallback mismatch");
-    assert.strictEqual(invalidSchema.projectTitle, "Classification unavailable", "invalid_schema: projectTitle fallback mismatch");
+    assert.strictEqual(invalidSchema.summary, "Health service improvement request", "invalid_schema: summary fallback mismatch");
+    assert.strictEqual(invalidSchema.projectTitle, "Health service improvement request", "invalid_schema: projectTitle fallback mismatch");
     assert.strictEqual(invalidSchema.confidence, 0, "invalid_schema: confidence fallback mismatch");
     assert.strictEqual(invalidSchema.issueTheme, "Primary Healthcare", "invalid_schema: issueTheme fallback mismatch");
     assert.strictEqual(invalidSchema.recommendedDepartment, "Health Department", "invalid_schema: recommendedDepartment fallback mismatch");
@@ -86,8 +86,8 @@ async function run() {
   try {
     assert.strictEqual(apiFailure.category, "roads", "api_failure: category fallback mismatch");
     assert.strictEqual(apiFailure.subcategory, "general", "api_failure: subcategory fallback mismatch");
-    assert.strictEqual(apiFailure.summary, "Classification unavailable", "api_failure: summary fallback mismatch");
-    assert.strictEqual(apiFailure.projectTitle, "Classification unavailable", "api_failure: projectTitle fallback mismatch");
+    assert.strictEqual(apiFailure.summary, "Road repair request", "api_failure: summary fallback mismatch");
+    assert.strictEqual(apiFailure.projectTitle, "Road repair request", "api_failure: projectTitle fallback mismatch");
     assert.strictEqual(apiFailure.confidence, 0, "api_failure: confidence fallback mismatch");
     assert.strictEqual(apiFailure.issueTheme, "Road Repair", "api_failure: issueTheme fallback mismatch");
     assert.strictEqual(apiFailure.recommendedDepartment, "Public Works Department", "api_failure: recommendedDepartment fallback mismatch");
