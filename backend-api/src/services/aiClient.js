@@ -28,18 +28,50 @@ function makeClassification(rawIssue) {
     category,
     subcategory: "general",
     severity: "medium",
-    summary: "Civic improvement project",
+    summary: DEFAULT_PROJECT_TITLE[category] || DEFAULT_PROJECT_TITLE.other,
     confidence: 0,
   };
 }
 
+const DEFAULT_PROJECT_TITLE = {
+  roads: "Road repair request",
+  schools: "School infrastructure request",
+  health: "Health service improvement request",
+  sanitation: "Sanitation improvement request",
+  livelihood: "Livelihood support request",
+  other: "Civic improvement request",
+};
+
+function deriveProjectTitle(text, category) {
+  if (typeof text === "string") {
+    const lower = text.toLowerCase();
+    if (lower.includes("pothole")) return "Repair pothole near reported location";
+    if (lower.includes("streetlight") || lower.includes("street light")) return "Restore streetlights near reported location";
+    if (lower.includes("water")) return "Restore local water supply";
+  }
+  return DEFAULT_PROJECT_TITLE[category] || DEFAULT_PROJECT_TITLE.other;
+}
+
+function deriveClusterSummary(text) {
+  if (typeof text === "string" && text.trim()) {
+    const short = text.trim().substring(0, 80);
+    return `Citizen report highlights: ${short}`;
+  }
+  return "Report submitted successfully.";
+}
+
 function makeFallback(rawIssue, meta = {}) {
   const classification = makeClassification(rawIssue);
+  const category = classification.category;
+  const text = rawIssue && typeof rawIssue.text === "string" ? rawIssue.text : "";
 
   return {
-    finalCategory: classification.category,
+    finalCategory: category,
     severity: classification.severity,
-    projectTitle: classification.summary,
+    projectTitle: deriveProjectTitle(text, category),
+    issueTheme: deriveThemeFromCategory(category),
+    recommendedDepartment: deriveDepartmentFromCategory(category),
+    clusterSummary: deriveClusterSummary(text),
     priorityScore: 0.5,
     wardId: (rawIssue && rawIssue.wardId) || "15",
     classification,
@@ -61,17 +93,53 @@ function makeFallback(rawIssue, meta = {}) {
   };
 }
 
+function deriveThemeFromCategory(category) {
+  switch (category) {
+    case "roads": return "Road Repair";
+    case "schools": return "School Infrastructure";
+    case "health": return "Health Access";
+    case "sanitation": return "Sanitation";
+    case "livelihood": return "Livelihood Support";
+    default: return "Civic Improvement";
+  }
+}
+
+function deriveDepartmentFromCategory(category) {
+  switch (category) {
+    case "roads": return "Public Works Department";
+    case "schools": return "Education Department";
+    case "health": return "Health Department";
+    case "sanitation": return "Sanitation Department";
+    case "livelihood": return "Local Development Office";
+    default: return "Constituency Development Office";
+  }
+}
+
 function normalizeResult(result, rawIssue) {
   const classification = result && result.classification ? result.classification : makeClassification(rawIssue);
+  const category = rawIssue && rawIssue.categoryHint ? rawIssue.categoryHint : "roads";
+  const text = rawIssue && typeof rawIssue.text === "string" ? rawIssue.text : "";
   const finalCategory = result && (result.finalCategory || result.category) ? (result.finalCategory || result.category) : classification.category;
   const severity = result && result.severity ? result.severity : classification.severity;
-  const projectTitle = result && (result.projectTitle || result.summary) ? (result.projectTitle || result.summary) : classification.summary;
+
+  const rawTitle = result && (result.projectTitle || result.summary) ? (result.projectTitle || result.summary) : "";
+  const projectTitle = rawTitle && rawTitle !== "Classification unavailable"
+    ? rawTitle
+    : deriveProjectTitle(text, finalCategory || category);
+
+  const rawSummary = result && result.clusterSummary ? result.clusterSummary : "";
+  const clusterSummary = rawSummary && rawSummary !== "Classification unavailable"
+    ? rawSummary
+    : deriveClusterSummary(text);
 
   const normalized = {
     ...result,
     finalCategory,
     severity,
     projectTitle,
+    clusterSummary,
+    issueTheme: (result && result.issueTheme) || deriveThemeFromCategory(finalCategory || category),
+    recommendedDepartment: (result && result.recommendedDepartment) || deriveDepartmentFromCategory(finalCategory || category),
     classification: {
       category: classification.category || finalCategory || "roads",
       subcategory: classification.subcategory || (result && result.subcategory) || "general",

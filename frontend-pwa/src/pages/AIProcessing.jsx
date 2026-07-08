@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Loader2, AlertCircle } from "lucide-react";
 import { useReport } from "./ReportNeed/ReportContext";
 import { submitIssue } from "../api/endpoints";
+import { saveCompletedSubmission } from "../services/offlineStore";
 
 const STEPS = [
   "Understanding your request...",
@@ -91,6 +92,63 @@ export const AIProcessing = () => {
 
         clearInterval(stepTimer);
         setBackendResponse(res);
+
+        const severity = res.severity || "medium";
+        const priorityScore =
+          typeof res.priorityScore === "number" ? res.priorityScore : 0;
+        const status =
+          severity === "high" || priorityScore >= 0.7
+            ? "Priority Identified"
+            : "Under Analysis";
+
+        const resolvedProjectTitle =
+          (res.projectTitle && res.projectTitle !== "Classification unavailable"
+            ? res.projectTitle
+            : null) ||
+          res.issueTheme ||
+          (payload.text ? payload.text.substring(0, 60) : null) ||
+          "Submitted civic issue";
+
+        const resolvedCategory =
+          (res.finalCategory && res.finalCategory !== "Classification unavailable"
+            ? res.finalCategory
+            : null) ||
+          normalizeCategoryHint(draft.categoryHint) ||
+          "other";
+
+        const resolvedClusterSummary =
+          (res.clusterSummary && res.clusterSummary !== "Classification unavailable"
+            ? res.clusterSummary
+            : null) ||
+          payload.text ||
+          "Report submitted successfully.";
+
+        const resolvedDepartment =
+          (res.recommendedDepartment &&
+          res.recommendedDepartment !== "Classification unavailable"
+            ? res.recommendedDepartment
+            : null) ||
+          "Department review required";
+
+        const localSubmission = {
+          localId: `local_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+          backendIssueId: res.issueId || "",
+          text: payload.text,
+          category: payload.categoryHint || "",
+          finalCategory: resolvedCategory,
+          projectTitle: resolvedProjectTitle,
+          clusterSummary: resolvedClusterSummary,
+          issueTheme: res.issueTheme || "",
+          recommendedDepartment: resolvedDepartment,
+          severity,
+          priorityScore,
+          ward: "",
+          locality: draft.location?.localityName || "",
+          createdAt: payload.createdAt,
+          status,
+        };
+
+        await saveCompletedSubmission(localSubmission);
 
         completeTimer = setTimeout(() => {
           navigate("/ai-confirmation");

@@ -4,10 +4,15 @@ let dbPromise = null;
 
 export function getDB() {
   if (!dbPromise) {
-    dbPromise = openDB("civora-db", 1, {
-      upgrade(db) {
-        db.createObjectStore("drafts", { keyPath: "id" });
-        db.createObjectStore("pendingSubmissions", { keyPath: "id" });
+    dbPromise = openDB("civora-db", 2, {
+      upgrade(db, oldVersion) {
+        if (oldVersion < 1) {
+          db.createObjectStore("drafts", { keyPath: "id" });
+          db.createObjectStore("pendingSubmissions", { keyPath: "id" });
+        }
+        if (oldVersion < 2) {
+          db.createObjectStore("completedSubmissions", { keyPath: "localId" });
+        }
       },
     });
   }
@@ -42,4 +47,19 @@ export async function getPendingSubmissions() {
 export async function removePendingSubmission(id) {
   const db = await getDB();
   await db.delete("pendingSubmissions", id);
+}
+
+export async function saveCompletedSubmission(submission) {
+  const db = await getDB();
+  await db.put("completedSubmissions", submission);
+}
+
+export async function getCompletedSubmissions() {
+  const db = await getDB();
+  return db.getAll("completedSubmissions");
+}
+
+export async function clearCompletedSubmissions() {
+  const db = await getDB();
+  await db.clear("completedSubmissions");
 }
