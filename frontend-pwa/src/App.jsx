@@ -1,64 +1,73 @@
-import React, { useState } from "react";
-import ReportIssue from "./components/ReportIssue.jsx";
-import Dashboard from "./components/Dashboard.jsx";
+import React from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { I18nProvider } from "./i18n/Context";
+import { ReportProvider } from "./pages/ReportNeed/ReportContext";
+import { BottomNavigation } from "./components/BottomNavigation";
+import { OfflineBanner } from "./components/OfflineBanner";
+
+import { LanguageSelection } from "./pages/LanguageSelection";
+import { CitizenHome } from "./pages/CitizenHome";
+import { Step1Input } from "./pages/ReportNeed/Step1Input";
+import { Step2Location } from "./pages/ReportNeed/Step2Location";
+import { Step3Category } from "./pages/ReportNeed/Step3Category";
+import { Step4Review } from "./pages/ReportNeed/Step4Review";
+import { AIProcessing } from "./pages/AIProcessing";
+import { AIConfirmation } from "./pages/AIConfirmation";
+import { SubmissionSuccess } from "./pages/SubmissionSuccess";
+import { MySubmissions } from "./pages/MySubmissions";
+import { IssueDetail } from "./pages/IssueDetail";
+import { MPDashboard } from "./pages/MPDashboard";
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Login } from './pages/Login';
 
-const MainApp = () => {
+function App() {
   const [view, setView] = useState("citizen");
-  const { isAuthenticated, user, isGuest, logout } = useAuth();
 
   return (
-    <div className="app-shell">
-      <header className="app-nav">
-        <div className="app-brand">
-          <div className="app-brand-badge">C</div>
-          <div>
-            <h1>Civora</h1>
-            <p>Citizen reporting and MP planning</p>
+    <I18nProvider>
+      <ReportProvider>
+        <BrowserRouter>
+          <div className="app-shell flex flex-col min-h-screen bg-gray-50 font-sans">
+            <OfflineBanner />
+            <main className="flex-1 w-full max-w-md mx-auto bg-white shadow-xl min-h-screen relative overflow-x-hidden">
+              <Routes>
+                <Route path="/" element={<LanguageSelection />} />
+                <Route path="/home" element={<CitizenHome />} />
+                <Route path="/report/step1" element={<Step1Input />} />
+                <Route path="/report/step2" element={<Step2Location />} />
+                <Route path="/report/step3" element={<Step3Category />} />
+                <Route path="/report/step4" element={<Step4Review />} />
+                <Route path="/ai-processing" element={<AIProcessing />} />
+                <Route path="/ai-confirmation" element={<AIConfirmation />} />
+                <Route path="/success" element={<SubmissionSuccess />} />
+                <Route path="/submissions" element={<MySubmissions />} />
+                <Route path="/issue/:id" element={<IssueDetail />} />
+                <Route path="/dashboard" element={<MPDashboard />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+              <BottomNavigation />
+            </main>
           </div>
         </div>
-        
-        <div className="flex items-center gap-4">
-          <div className="view-toggle" role="tablist" aria-label="Workspace view">
-            <button
-              type="button"
-              className={view === "citizen" ? "active" : ""}
-              onClick={() => setView("citizen")}
-            >
-              Citizen View
-            </button>
-            <button
-              type="button"
-              className={view === "dashboard" ? "active" : ""}
-              onClick={() => setView("dashboard")}
-            >
-              MP Dashboard
-            </button>
-          </div>
-          
-          {isAuthenticated && (
-            <div className="flex items-center gap-3 ml-4 border-l pl-4 border-gray-200">
-              <span className="text-sm text-gray-600 font-medium">
-                {isGuest ? 'Guest' : user?.displayName || 'User'}
-              </span>
-              <button 
-                onClick={logout}
-                className="text-sm font-semibold text-red-600 hover:text-red-700"
-              >
-                Logout
-              </button>
-            </div>
-          )}
+        <div className="view-toggle" role="tablist" aria-label="Workspace view">
+          <button
+            type="button"
+            className={view === "citizen" ? "active" : ""}
+            onClick={() => setView("citizen")}
+          >
+            Citizen View
+          </button>
+          <button
+            type="button"
+            className={view === "dashboard" ? "active" : ""}
+            onClick={() => setView("dashboard")}
+          >
+            MP Dashboard
+          </button>
         </div>
       </header>
-      
       <main className="app-content">
-        {view === "citizen" ? (
-          isAuthenticated ? <ReportIssue /> : <Login />
-        ) : (
-          <Dashboard />
-        )}
+        {view === "citizen" ? <ReportIssue /> : <Dashboard />}
       </main>
     </div>
   );

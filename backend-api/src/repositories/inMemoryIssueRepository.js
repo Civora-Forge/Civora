@@ -30,4 +30,8 @@ async function clearIssues() {
   nextId = 1;
 }
 
-module.exports = { addIssue, updateIssue, getAllIssues, getIssueById, clearIssues };
+async function getIssuesByUserId(userId) {
+  return issues.filter((issue) => issue.userId === userId);
+}
+
+module.exports = { addIssue, updateIssue, getAllIssues, getIssueById, clearIssues, getIssuesByUserId };

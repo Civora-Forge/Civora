@@ -5,10 +5,9 @@
  * Runs in stub mode by default. Set GEMINI_API_KEY to enable real calls.
  */
 
-const fetch = require("node-fetch");
 const { buildClassificationPrompt } = require("../prompts/issueClassificationPrompt");
 
-const DEFAULT_MODEL = process.env.GEMINI_CLASSIFICATION_MODEL || "gemini-1.5-flash";
+const DEFAULT_MODEL = process.env.GEMINI_CLASSIFICATION_MODEL || process.env.GEMINI_MODEL || "gemini-2.5-flash";
 const ALLOWED_CATEGORIES = new Set(["roads", "schools", "health", "sanitation", "livelihood", "other"]);
 const ALLOWED_SEVERITIES = new Set(["low", "medium", "high"]);
 const ALLOWED_THEMES = new Set([
@@ -55,14 +54,45 @@ const CATEGORY_DEPARTMENT_MAP = {
   livelihood: "Agriculture Department",
 };
 
+function deriveProjectTitleFromText(text, category) {
+  if (typeof text !== "string") return deriveDefaultProjectTitle(category);
+  const lower = text.toLowerCase();
+  if (lower.includes("pothole")) return "Repair pothole near reported location";
+  if (lower.includes("streetlight") || lower.includes("street light")) return "Restore streetlights near reported location";
+  if (lower.includes("water")) return "Restore local water supply";
+  return deriveDefaultProjectTitle(category);
+}
+
+function deriveDefaultProjectTitle(category) {
+  switch (category) {
+    case "roads": return "Road repair request";
+    case "schools": return "School infrastructure request";
+    case "health": return "Health service improvement request";
+    case "sanitation": return "Sanitation improvement request";
+    case "livelihood": return "Livelihood support request";
+    default: return "Civic improvement request";
+  }
+}
+
+function deriveClusterSummary(text) {
+  if (typeof text === "string" && text.trim()) {
+    const short = text.trim().substring(0, 80);
+    return `Citizen report highlights: ${short}`;
+  }
+  return "Report submitted successfully.";
+}
+
 function makeFallback(input) {
   const category = normalizeCategory(input && input.categoryHint, "other");
+  const text = input && typeof input.translatedText === "string"
+    ? input.translatedText
+    : (input && typeof input.text === "string" ? input.text : "");
   return {
     category,
     subcategory: "general",
     severity: "medium",
-    summary: "Classification unavailable",
-    projectTitle: "Classification unavailable",
+    summary: deriveDefaultProjectTitle(category),
+    projectTitle: deriveProjectTitleFromText(text, category),
     confidence: 0,
     issueTheme: deriveThemeFromCategory(category),
     recommendedDepartment: deriveDepartmentFromCategory(category),

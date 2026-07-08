@@ -7,9 +7,8 @@
 
 const fs = require("fs");
 const path = require("path");
-const fetch = require("node-fetch");
 
-const DEFAULT_MODEL = process.env.GEMINI_VISION_MODEL || "gemini-1.5-flash";
+const DEFAULT_MODEL = process.env.GEMINI_VISION_MODEL || process.env.GEMINI_MODEL || "gemini-2.5-flash";
 const SUPPORTED_MIME_TYPES = new Set([
   "image/jpeg",
   "image/jpg",

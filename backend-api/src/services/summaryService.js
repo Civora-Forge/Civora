@@ -1,5 +1,6 @@
 const { getAllIssues } = require("../repositories/inMemoryIssueRepository");
 const { buildClusters } = require("./issueClustering");
+const { getWardProfiles } = require("../data/wardProfiles");
 
 async function buildSummary() {
   const issues = await getAllIssues();
@@ -59,6 +60,7 @@ async function buildSummary() {
     bySeverity,
     topWards,
     topProjects,
+    generatedAt: new Date().toISOString(),
   };
 }
 

@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { LocationPicker } from "./LocationPicker";
 const API_BASE_URL = "http://localhost:5001";
 
 function ReportIssue() {

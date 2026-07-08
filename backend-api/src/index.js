@@ -7,12 +7,39 @@ const { env } = require("./config/env");
 const issuesRouter = require("./routes/issues");
 const summaryRouter = require("./routes/summary");
 const hotspotsRouter = require("./routes/hotspots");
+const wardsRouter = require("./routes/wards");
 
 const app = express();
 
-// CORS configuration for local development
+// CORS configuration
+// In development: allow localhost origins
+// In production: allow the Vercel frontend and any origin (hackathon demo)
+const isDev = env.NODE_ENV !== "production";
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "http://localhost:5174",
+];
+if (!isDev) {
+  // Allow Vercel deployments (any subdomain) and the custom domain
+  allowedOrigins.push(/^https:\/\/.*\.vercel\.app$/);
+}
 const corsOptions = {
-  origin: ["http://localhost:5173", "http://localhost:3000"],
+  origin: (origin, callback) => {
+    // Allow requests with no origin (curl, server-to-server, mobile apps)
+    if (!origin) return callback(null, true);
+    // In dev, allow all localhost
+    if (isDev && /^https?:\/\/localhost/.test(origin)) return callback(null, true);
+    // Check exact matches
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    // Check regex patterns (for Vercel subdomains)
+    if (allowedOrigins.some((pattern) => pattern instanceof RegExp && pattern.test(origin))) {
+      return callback(null, true);
+    }
+    // In production, allow all origins for hackathon demo flexibility
+    if (!isDev) return callback(null, true);
+    callback(new Error("Not allowed by CORS"));
+  },
   methods: ["GET", "POST", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
@@ -31,7 +58,7 @@ app.get("/", (req, res) => {
     repository: env.ISSUE_REPOSITORY,
     aiEnrichment: env.ENABLE_AI_ENRICHMENT ? "enabled" : "stub",
     bigqueryExport: env.ENABLE_BIGQUERY_EXPORT ? "enabled" : "disabled",
-    endpoints: ["POST /issues", "GET /summary", "GET /hotspots"],
+    endpoints: ["POST /issues", "GET /issues/my", "GET /summary", "GET /hotspots", "GET /wards"],
   });
 });
 
@@ -39,9 +66,10 @@ app.get("/", (req, res) => {
 app.use("/issues", issuesRouter);
 app.use("/summary", summaryRouter);
 app.use("/hotspots", hotspotsRouter);
+app.use("/wards", wardsRouter);
 
-// Dev-only routes (seed/clear)
-if (env.NODE_ENV !== "production") {
+// Dev routes (seed/clear) — available in development OR when ENABLE_DEV_ROUTES=true
+if (env.NODE_ENV !== "production" || env.ENABLE_DEV_ROUTES) {
   const devRouter = require("./routes/dev");
   app.use("/dev", devRouter);
 }
@@ -53,7 +81,8 @@ app.listen(env.PORT, () => {
   console.log(`Civora backend running on http://localhost:${env.PORT}`);
   console.log(`Repository mode: ${env.ISSUE_REPOSITORY}`);
   console.log(`AI enrichment: ${env.ENABLE_AI_ENRICHMENT ? "enabled" : "stub"}`);
-  if (env.NODE_ENV !== "production") {
+  console.log(`Firebase Auth: ${env.ENABLE_FIREBASE_AUTH ? "enabled" : "disabled"}`);
+  if (env.NODE_ENV !== "production" || env.ENABLE_DEV_ROUTES) {
     console.log("Dev routes enabled: POST /dev/seed, DELETE /dev/clear");
   }
 });

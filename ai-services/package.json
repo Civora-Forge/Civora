@@ -7,7 +7,6 @@
     "test": "node test/run_enrich_tests.js && node test/run_tests.js && node test/run_translation_tests.js && node test/run_vision_tests.js && node test/run_gemini_tests.js"
   },
   "dependencies": {
-    "@google-cloud/speech": "^7.5.0",
-    "node-fetch": "^2.7.0"
+    "@google-cloud/speech": "^7.5.0"
   }
 }
