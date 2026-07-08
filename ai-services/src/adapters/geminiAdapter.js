@@ -7,7 +7,7 @@
 
 const { buildClassificationPrompt } = require("../prompts/issueClassificationPrompt");
 
-const DEFAULT_MODEL = process.env.GEMINI_CLASSIFICATION_MODEL || "gemini-1.5-flash";
+const DEFAULT_MODEL = process.env.GEMINI_CLASSIFICATION_MODEL || process.env.GEMINI_MODEL || "gemini-2.5-flash";
 const ALLOWED_CATEGORIES = new Set(["roads", "schools", "health", "sanitation", "livelihood", "other"]);
 const ALLOWED_SEVERITIES = new Set(["low", "medium", "high"]);
 const ALLOWED_THEMES = new Set([
