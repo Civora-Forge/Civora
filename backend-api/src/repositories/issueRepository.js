@@ -1,4 +1,4 @@
-const { addIssue, updateIssue, getAllIssues, getIssueById, clearIssues } = require("./inMemoryIssueRepository");
+const { addIssue, updateIssue, getAllIssues, getIssueById, clearIssues, getIssuesByUserId } = require("./inMemoryIssueRepository");
 
 let firestoreRepo = null;
 
@@ -12,7 +12,7 @@ function getRepository() {
     return firestoreRepo;
   }
 
-  return { addIssue, updateIssue, getAllIssues, getIssueById, clearIssues };
+  return { addIssue, updateIssue, getAllIssues, getIssueById, clearIssues, getIssuesByUserId };
 }
 
 module.exports = { getRepository };

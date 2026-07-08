@@ -58,7 +58,7 @@ app.get("/", (req, res) => {
     repository: env.ISSUE_REPOSITORY,
     aiEnrichment: env.ENABLE_AI_ENRICHMENT ? "enabled" : "stub",
     bigqueryExport: env.ENABLE_BIGQUERY_EXPORT ? "enabled" : "disabled",
-    endpoints: ["POST /issues", "GET /summary", "GET /hotspots", "GET /wards"],
+    endpoints: ["POST /issues", "GET /issues/my", "GET /summary", "GET /hotspots", "GET /wards"],
   });
 });
 
@@ -81,6 +81,7 @@ app.listen(env.PORT, () => {
   console.log(`Civora backend running on http://localhost:${env.PORT}`);
   console.log(`Repository mode: ${env.ISSUE_REPOSITORY}`);
   console.log(`AI enrichment: ${env.ENABLE_AI_ENRICHMENT ? "enabled" : "stub"}`);
+  console.log(`Firebase Auth: ${env.ENABLE_FIREBASE_AUTH ? "enabled" : "disabled"}`);
   if (env.NODE_ENV !== "production" || env.ENABLE_DEV_ROUTES) {
     console.log("Dev routes enabled: POST /dev/seed, DELETE /dev/clear");
   }
