@@ -4,15 +4,16 @@ const { calculatePriorityScore } = require("./priorityScoring");
 const { assignClusterIds } = require("./issueClustering");
 const { buildPriorityExplanation } = require("./priorityExplanation");
 const { daysSince } = require("../utils/dates");
-
-const WARD_DATA = {
-  "15": { population: 25000, numSchools: 5, numPHCs: 2 },
-  "7": { population: 18000, numSchools: 3, numPHCs: 1 },
-  "21": { population: 32000, numSchools: 4, numPHCs: 2 },
-};
+const { getWardProfile } = require("../data/wardProfiles");
 
 function getWardContext(wardId) {
-  return WARD_DATA[wardId] || {};
+  const profile = getWardProfile(wardId);
+  if (!profile) return {};
+  return {
+    population: profile.population,
+    numSchools: profile.numSchools,
+    numPHCs: profile.numPHCs,
+  };
 }
 
 async function submitIssue(rawIssue) {

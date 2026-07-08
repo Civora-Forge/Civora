@@ -6,6 +6,7 @@ const env = {
   FIRESTORE_DATABASE_ID: process.env.FIRESTORE_DATABASE_ID || "(default)",
   ENABLE_AI_ENRICHMENT: process.env.ENABLE_AI_ENRICHMENT === "true",
   ENABLE_BIGQUERY_EXPORT: process.env.ENABLE_BIGQUERY_EXPORT === "true",
+  ENABLE_DEV_ROUTES: process.env.ENABLE_DEV_ROUTES === "true",
   GEMINI_API_KEY: process.env.GEMINI_API_KEY || "",
   AI_ENRICHMENT_TIMEOUT_MS: process.env.AI_ENRICHMENT_TIMEOUT_MS
     ? parseInt(process.env.AI_ENRICHMENT_TIMEOUT_MS, 10)
