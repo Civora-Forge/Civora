@@ -90,6 +90,11 @@ async function submitIssue(rawIssue) {
     clusterId: clusterInfo.clusterId,
     clusterSummary: clusterInfo.clusterSummary || issue.clusterSummary || issue.projectTitle || "Civic improvement project",
     explanation,
+    projectTitle: finalStored.projectTitle || "",
+    issueTheme: finalStored.issueTheme || "",
+    recommendedDepartment: finalStored.recommendedDepartment || "",
+    finalCategory: finalStored.finalCategory || "",
+    severity: finalStored.severity || "",
   };
 }
 

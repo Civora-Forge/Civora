@@ -3,10 +3,21 @@
  *
  * Wraps the ai-services `enrichIssue` function with timeouts, logging, and
  * safe fallbacks so the backend remains responsive if AI enrichment fails.
+ *
+ * TODO: The relative import path below is fragile. Once the monorepo adopts
+ * npm workspaces or a bundler, replace with a proper package reference
+ * (e.g. `require("civora-ai-services")`).
  */
 
 const { env } = require("../config/env");
-const { enrichIssue: enrichIssueImpl } = require("../../../ai-services/src/enrichIssue");
+
+let enrichIssueImpl;
+try {
+  enrichIssueImpl = require("../../../ai-services/src/enrichIssue").enrichIssue;
+} catch (err) {
+  console.warn("aiClient: could not load ai-services/enrichIssue, using built-in fallback.", err.message);
+  enrichIssueImpl = null;
+}
 
 const DEFAULT_TIMEOUT_MS = env.AI_ENRICHMENT_TIMEOUT_MS || 3000;
 
@@ -95,6 +106,10 @@ async function enrichIssue(rawIssue) {
   if (!rawIssue || typeof rawIssue !== "object") {
     console.warn("aiClient.enrichIssue called without a valid rawIssue, returning fallback");
     return makeFallback(rawIssue, { reason: "invalid_input" });
+  }
+
+  if (!enrichIssueImpl) {
+    return makeFallback(rawIssue, { reason: "ai_services_unavailable" });
   }
 
   try {

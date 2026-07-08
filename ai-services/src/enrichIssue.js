@@ -126,7 +126,7 @@ async function enrichIssue(rawIssue) {
       speechLanguage: speechResult.language || language,
       speechConfidence: speechResult.confidence || 0,
       translatedText: translationResult.translatedText !== enrichedText ? translationResult.translatedText : "",
-      detectedLanguage: translationResult.detectedLanguage || language,
+      detectedLanguage: translationResult.language || language,
       imageSummary: visionResult.summary || "",
       imageObjects: visionResult.objects || [],
       imagePossibleIssue: visionResult.possibleIssue || "",

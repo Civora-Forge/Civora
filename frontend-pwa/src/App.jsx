@@ -16,6 +16,7 @@ import { AIConfirmation } from "./pages/AIConfirmation";
 import { SubmissionSuccess } from "./pages/SubmissionSuccess";
 import { MySubmissions } from "./pages/MySubmissions";
 import { IssueDetail } from "./pages/IssueDetail";
+import { MPDashboard } from "./pages/MPDashboard";
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
                 <Route path="/success" element={<SubmissionSuccess />} />
                 <Route path="/submissions" element={<MySubmissions />} />
                 <Route path="/issue/:id" element={<IssueDetail />} />
+                <Route path="/dashboard" element={<MPDashboard />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
               <BottomNavigation />

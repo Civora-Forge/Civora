@@ -14,3 +14,11 @@ export async function getSummary() {
 export async function getHotspots() {
   return apiClient("/hotspots");
 }
+
+export async function seedDemoIssues() {
+  return apiClient("/dev/seed", { method: "POST" });
+}
+
+export async function clearDemoIssues() {
+  return apiClient("/dev/clear", { method: "DELETE" });
+}

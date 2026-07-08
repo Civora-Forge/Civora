@@ -5,7 +5,6 @@
  * Runs in stub mode by default. Set GEMINI_API_KEY to enable real calls.
  */
 
-const fetch = require("node-fetch");
 const { buildClassificationPrompt } = require("../prompts/issueClassificationPrompt");
 
 const DEFAULT_MODEL = process.env.GEMINI_CLASSIFICATION_MODEL || "gemini-1.5-flash";

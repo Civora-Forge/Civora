@@ -9,15 +9,27 @@ const ReportContext = createContext(null);
 
 export const ReportProvider = ({ children }) => {
   const [draft, setDraft] = useState(defaultDraft);
+  const [backendResponse, setBackendResponse] = useState(null);
 
   const updateDraft = (updates) => {
     setDraft((prev) => ({ ...prev, ...updates }));
   };
 
-  const resetDraft = () => setDraft(defaultDraft);
+  const resetDraft = () => {
+    setDraft(defaultDraft);
+    setBackendResponse(null);
+  };
 
   return (
-    <ReportContext.Provider value={{ draft, updateDraft, resetDraft }}>
+    <ReportContext.Provider
+      value={{
+        draft,
+        updateDraft,
+        resetDraft,
+        backendResponse,
+        setBackendResponse,
+      }}
+    >
       {children}
     </ReportContext.Provider>
   );

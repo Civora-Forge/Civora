@@ -1,5 +1,5 @@
 import React from "react";
-import { Home, PlusCircle, FileText } from "lucide-react";
+import { Home, PlusCircle, FileText, BarChart3 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "../i18n/Context";
 
@@ -12,6 +12,7 @@ export const BottomNavigation = () => {
     { path: "/home", icon: Home, label: t("nav.home") },
     { path: "/report", icon: PlusCircle, label: t("nav.report") },
     { path: "/submissions", icon: FileText, label: t("nav.submissions") },
+    { path: "/dashboard", icon: BarChart3, label: "Dashboard" },
   ];
 
   if (location.pathname === "/" || location.pathname.startsWith("/report/step"))
