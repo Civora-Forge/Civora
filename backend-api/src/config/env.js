@@ -10,7 +10,7 @@ const env = {
   GEMINI_API_KEY: process.env.GEMINI_API_KEY || "",
   AI_ENRICHMENT_TIMEOUT_MS: process.env.AI_ENRICHMENT_TIMEOUT_MS
     ? parseInt(process.env.AI_ENRICHMENT_TIMEOUT_MS, 10)
-    : 3000,
+    : 8000,
 };
 
 module.exports = { env };
