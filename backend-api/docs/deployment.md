@@ -26,6 +26,7 @@ Server starts at `http://localhost:5001`.
 | `ENABLE_DEV_ROUTES` | `true` | Allows `/dev/seed` and `/dev/clear` on Render |
 | `ENABLE_AI_ENRICHMENT` | `false` | Stub mode (no Gemini key needed) |
 | `ENABLE_BIGQUERY_EXPORT` | `false` | No BigQuery export |
+| `ENABLE_FIREBASE_AUTH` | `false` | No Firebase Auth (anonymous only) |
 
 ### After First Deploy
 
@@ -83,6 +84,18 @@ Invoke-RestMethod -Method Post `
   -Body '{"text":"Large pothole near the bus stop causing traffic issues","language":"en","latitude":8.5241,"longitude":76.9366,"createdAt":"2026-07-06T12:00:00Z","categoryHint":"roads"}'
 ```
 
+### Get my submissions (auth disabled)
+```powershell
+Invoke-RestMethod -Uri "http://localhost:5001/issues/my"
+# Returns 401 with AUTH_DISABLED error
+```
+
+### Get my submissions (auth enabled, with token)
+```powershell
+Invoke-RestMethod -Uri "http://localhost:5001/issues/my" `
+  -Headers @{"Authorization"="Bearer <firebase-id-token>"}
+```
+
 ---
 
 ## Environment Variables Reference
@@ -99,6 +112,8 @@ Invoke-RestMethod -Method Post `
 | `ENABLE_DEV_ROUTES` | `false` | Enable `/dev/seed` and `/dev/clear` in production |
 | `GEMINI_API_KEY` | (empty) | Gemini API key |
 | `AI_ENRICHMENT_TIMEOUT_MS` | `3000` | AI enrichment timeout |
+| `ENABLE_FIREBASE_AUTH` | `false` | Enable Firebase Auth (optional) |
+| `FIREBASE_PROJECT_ID` | (empty) | Firebase project ID for auth |
 
 ---
 
@@ -118,3 +133,10 @@ Invoke-RestMethod -Method Post `
 ### Ward data
 - Loaded from `data-infra/samples/ward_sample.csv` if available
 - Falls back to hardcoded wards (7, 15, 21)
+
+### Firebase Auth (optional)
+- Set `ENABLE_FIREBASE_AUTH=true` and `FIREBASE_PROJECT_ID=<your-project>` on Render
+- POST /issues still works without auth (anonymous submissions)
+- POST /issues with `Authorization: Bearer <token>` attaches userId
+- GET /issues/my requires a valid Firebase ID token
+- firebase-admin is lazy-loaded — server starts without it when auth is disabled

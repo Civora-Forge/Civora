@@ -20,6 +20,7 @@ function getWardContext(wardId) {
 // Real citizen submissions still use AI enrichment.
 async function submitIssue(rawIssue, options = {}) {
   const repo = getRepository();
+  const userId = options.userId || null;
 
   const enrichedFields = options.skipAI
     ? {
@@ -51,6 +52,7 @@ async function submitIssue(rawIssue, options = {}) {
   const issue = {
     ...rawIssue,
     ...enrichedFields,
+    userId,
     clusterSummary: enrichedFields.clusterSummary || "",
     aiPriorityScore: enrichedFields.priorityScore || 0.5,
     backendPriorityScore: 0,
@@ -130,4 +132,14 @@ async function insertSeedIssue(seedIssue) {
   return submitIssue(seedIssue, { skipAI: true });
 }
 
-module.exports = { submitIssue, insertSeedIssue, getWardContext };
+async function getIssuesByUserId(userId) {
+  const repo = getRepository();
+  if (typeof repo.getIssuesByUserId !== "function") {
+    // Fallback: filter from all issues
+    const all = await repo.getAllIssues();
+    return all.filter((i) => i.userId === userId);
+  }
+  return repo.getIssuesByUserId(userId);
+}
+
+module.exports = { submitIssue, insertSeedIssue, getWardContext, getIssuesByUserId };

@@ -11,6 +11,8 @@ const env = {
   AI_ENRICHMENT_TIMEOUT_MS: process.env.AI_ENRICHMENT_TIMEOUT_MS
     ? parseInt(process.env.AI_ENRICHMENT_TIMEOUT_MS, 10)
     : 8000,
+  ENABLE_FIREBASE_AUTH: process.env.ENABLE_FIREBASE_AUTH === "true",
+  FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID || "",
 };
 
 module.exports = { env };

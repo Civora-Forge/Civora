@@ -81,6 +81,22 @@ severity = low | medium | high
 
 Base URL: `http://localhost:5001`
 
+### Authentication
+
+Firebase Auth is **optional**. When `ENABLE_FIREBASE_AUTH=false` (default):
+- POST /issues accepts anonymous submissions (no token required)
+- GET /issues/my returns 401 with `AUTH_DISABLED` error
+
+When `ENABLE_FIREBASE_AUTH=true`:
+- POST /issues still works without a token (anonymous)
+- POST /issues with `Authorization: Bearer <Firebase ID token>` attaches userId
+- GET /issues/my requires a valid Firebase ID token
+- Invalid tokens are silently ignored on POST /issues (no rejection)
+
+Frontend should send: `Authorization: Bearer <Firebase ID token>`
+
+---
+
 ### GET /
 
 Health check.
@@ -94,17 +110,22 @@ Health check.
   "repository": "memory",
   "aiEnrichment": "stub",
   "bigqueryExport": "disabled",
-  "endpoints": ["POST /issues", "GET /summary", "GET /hotspots"]
+  "endpoints": ["POST /issues", "GET /issues/my", "GET /summary", "GET /hotspots", "GET /wards"]
 }
 ```
 
 ---
 
-### POST /issues
+### POST /issues (optional auth)
 
 Submit a new civic issue. Returns enriched result with AI classification, priority scoring, and clustering.
 
-**Request:**
+**Authentication (optional):**
+- Anonymous submissions work without any `Authorization` header.
+- If `ENABLE_FIREBASE_AUTH=true` and `Authorization: Bearer <Firebase ID token>` is provided, the token is verified and `userId` is attached to the stored issue.
+- Invalid tokens are silently ignored — the request proceeds anonymously (no 401).
+
+**Request (anonymous):**
 
 ```json
 {
@@ -117,6 +138,13 @@ Submit a new civic issue. Returns enriched result with AI classification, priori
   "createdAt": "2026-07-06T12:00:00Z",
   "categoryHint": "roads"
 }
+```
+
+**Request (authenticated):**
+
+Same body, plus header:
+```
+Authorization: Bearer <Firebase ID token>
 ```
 
 **Response (201):**
@@ -146,6 +174,61 @@ Submit a new civic issue. Returns enriched result with AI classification, priori
     "code": "VALIDATION_ERROR",
     "message": "Invalid issue payload",
     "details": [...]
+  }
+}
+```
+
+---
+
+### GET /issues/my (requires auth)
+
+Returns all issues submitted by the authenticated user.
+
+**Authentication:** Required. Must include `Authorization: Bearer <Firebase ID token>`.
+
+**Response (200):**
+
+```json
+{
+  "ok": true,
+  "count": 3,
+  "issues": [
+    {
+      "issueId": "issue_1",
+      "text": "Road is damaged near the bus stop",
+      "finalCategory": "roads",
+      "projectTitle": "Road repair request near reported location",
+      "issueTheme": "Road Repair",
+      "recommendedDepartment": "Public Works Department",
+      "severity": "medium",
+      "priorityScore": 0.82,
+      "clusterId": "cluster_1",
+      "createdAt": "2026-07-06T12:00:00Z"
+    }
+  ]
+}
+```
+
+**Error Response (401) — auth disabled:**
+
+```json
+{
+  "ok": false,
+  "error": {
+    "code": "AUTH_DISABLED",
+    "message": "Authentication is not enabled on this server"
+  }
+}
+```
+
+**Error Response (401) — no token:**
+
+```json
+{
+  "ok": false,
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "Valid Firebase ID token required"
   }
 }
 ```
