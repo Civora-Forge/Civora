@@ -16,10 +16,37 @@ function getWardContext(wardId) {
   };
 }
 
-async function submitIssue(rawIssue) {
+// Demo seed data is pre-enriched to avoid consuming Gemini quota.
+// Real citizen submissions still use AI enrichment.
+async function submitIssue(rawIssue, options = {}) {
   const repo = getRepository();
 
-  const enrichedFields = await enrichIssue(rawIssue);
+  const enrichedFields = options.skipAI
+    ? {
+        finalCategory: rawIssue.categoryHint || rawIssue.finalCategory || "other",
+        severity: rawIssue.severity || "medium",
+        projectTitle: rawIssue.projectTitle || rawIssue.text,
+        issueTheme: rawIssue.issueTheme || "",
+        recommendedDepartment: rawIssue.recommendedDepartment || "",
+        priorityScore: rawIssue.priorityScore || 0.5,
+        clusterSummary: rawIssue.clusterSummary || rawIssue.projectTitle || "",
+        wardId: rawIssue.wardId || "15",
+        aiSignals: rawIssue.aiSignals || {
+          speechTranscript: "",
+          speechLanguage: rawIssue.language || "unknown",
+          speechConfidence: 0,
+          translatedText: "",
+          detectedLanguage: rawIssue.language || "unknown",
+          imageSummary: "",
+          imageObjects: [],
+          imagePossibleIssue: "",
+          imageConfidence: 0,
+          photoFindings: [],
+          classificationConfidence: 0,
+          modelProvider: "seed",
+        },
+      }
+    : await enrichIssue(rawIssue);
 
   const issue = {
     ...rawIssue,
@@ -99,4 +126,8 @@ async function submitIssue(rawIssue) {
   };
 }
 
-module.exports = { submitIssue, getWardContext };
+async function insertSeedIssue(seedIssue) {
+  return submitIssue(seedIssue, { skipAI: true });
+}
+
+module.exports = { submitIssue, insertSeedIssue, getWardContext };
