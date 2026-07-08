@@ -11,6 +11,34 @@ const STEPS = [
   "Preparing your request for review...",
 ];
 
+const CATEGORY_MAP = {
+  roads: "roads",
+  pothole: "roads",
+  streetlights: "roads",
+  schools: "schools",
+  education: "schools",
+  health: "health",
+  sanitation: "sanitation",
+  drainage: "sanitation",
+  waste: "sanitation",
+  livelihood: "livelihood",
+  jobs: "livelihood",
+  water: "other",
+  public_safety: "other",
+  electricity: "other",
+  other: "other",
+};
+
+const SAFE_CATEGORIES = new Set(["roads", "schools", "health", "sanitation", "livelihood", "other"]);
+
+function normalizeCategoryHint(raw) {
+  if (!raw || typeof raw !== "string") return "";
+  const lower = raw.toLowerCase().trim();
+  const mapped = CATEGORY_MAP[lower];
+  if (mapped && SAFE_CATEGORIES.has(mapped)) return mapped;
+  return "";
+}
+
 export const AIProcessing = () => {
   const navigate = useNavigate();
   const { draft, setBackendResponse } = useReport();
@@ -33,16 +61,29 @@ export const AIProcessing = () => {
       }, interval);
 
       try {
+        const photoUrl =
+          draft.photoUrl && !draft.photoUrl.startsWith("blob:")
+            ? draft.photoUrl
+            : "";
+        const audioUrl =
+          draft.audioUrl && !draft.audioUrl.startsWith("blob:")
+            ? draft.audioUrl
+            : "";
+
         const payload = {
-          text: draft.text || "Voice/Photo submission without text",
-          language: draft.language,
-          latitude: draft.location?.latitude || 0,
-          longitude: draft.location?.longitude || 0,
+          text: (draft.text || "").trim() || "Voice/Photo submission without text",
+          language: draft.language || "en",
+          latitude: Number(draft.location?.latitude) || 0,
+          longitude: Number(draft.location?.longitude) || 0,
           createdAt: new Date().toISOString(),
-          photoUrl: draft.photoUrl || "",
-          audioUrl: draft.audioUrl || "",
-          categoryHint: draft.categoryHint || "",
+          photoUrl,
+          audioUrl,
+          categoryHint: normalizeCategoryHint(draft.categoryHint),
         };
+
+        if (import.meta.env.DEV) {
+          console.log("Submitting issue payload", payload);
+        }
 
         const res = await submitIssue(payload);
 
