@@ -54,7 +54,7 @@ async function submitIssue(rawIssue, options = {}) {
     clusterSummary: enrichedFields.clusterSummary || "",
     aiPriorityScore: enrichedFields.priorityScore || 0.5,
     backendPriorityScore: 0,
-    priorityScore: 0,
+    priorityScore: enrichedFields.priorityScore || 0.5,
     clusterId: "",
     duplicateCount: 1,
     priorityExplanation: [],
