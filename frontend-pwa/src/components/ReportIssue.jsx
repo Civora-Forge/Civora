@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-
+import { LocationPicker } from "./LocationPicker";
 const API_BASE_URL = "http://localhost:5001";
 
 function ReportIssue() {
@@ -159,27 +159,20 @@ function ReportIssue() {
           <label className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
             Location
           </label>
-          {/* TODO: Add "Use my location" button with navigator.geolocation */}
-          <div className="grid gap-3 sm:grid-cols-2">
-            <input
-              type="number"
-              name="latitude"
-              value={form.latitude}
-              onChange={handleChange}
-              placeholder="Latitude"
-              step="any"
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-            />
-            <input
-              type="number"
-              name="longitude"
-              value={form.longitude}
-              onChange={handleChange}
-              placeholder="Longitude"
-              step="any"
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-            />
-          </div>
+          <LocationPicker
+            lat={form.latitude}
+            lng={form.longitude}
+            onChange={(lat, lng, extraText) => {
+              setForm(prev => ({ ...prev, latitude: lat, longitude: lng }));
+              if (extraText) {
+                // Prepend location context to the main text if manual/reverse geocoded
+                setForm(prev => ({ 
+                  ...prev, 
+                  text: `[Location: ${extraText}]\n${prev.text}`.trim() 
+                }));
+              }
+            }}
+          />
         </div>
 
         <div className="space-y-2">
